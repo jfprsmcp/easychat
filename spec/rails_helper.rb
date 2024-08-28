@@ -74,6 +74,11 @@ RSpec.configure do |config|
   config.include ActiveSupport::Testing::TimeHelpers
   config.include ActionCable::TestHelper
   config.include ActiveJob::TestHelper
+
+  config.before(:each, type: :request) do
+    # Configura el entorno para que los usuarios se consideren confirmados
+    allow_any_instance_of(User).to receive(:confirmed?).and_return(true)
+  end
 end
 
 Shoulda::Matchers.configure do |config|

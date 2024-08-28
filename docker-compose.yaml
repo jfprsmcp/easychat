@@ -1,23 +1,12 @@
 services:
   base: &base
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      args:
-        BUNDLE_WITHOUT: ''
-        EXECJS_RUNTIME: 'Node'
-        RAILS_ENV: 'development'
-        RAILS_SERVE_STATIC_FILES: 'false'
+    image: chatwoot:development
     tty: true
     stdin_open: true
-    image: chatwoot:development
     env_file: .env
 
   rails:
     <<: *base
-    build:
-      context: .
-      dockerfile: ./docker/dockerfiles/rails.Dockerfile
     image: chatwoot-rails:development
     volumes:
       - ./:/app:delegated
@@ -61,9 +50,6 @@ services:
 
   webpack:
     <<: *base
-    build:
-      context: .
-      dockerfile: ./docker/dockerfiles/webpack.Dockerfile
     image: chatwoot-webpack:development
     volumes:
       - ./:/app:delegated
@@ -87,7 +73,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres:/data/postgres
+      - postgres:/var/lib/postgresql/data # Cambia la ruta del volumen
     environment:
       - POSTGRES_DB=chatwoot
       - POSTGRES_USER=postgres
