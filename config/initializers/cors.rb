@@ -22,10 +22,17 @@ end
 ################################################
 
 # Mount Action Cable outside main process or domain
-# Rails.application.config.action_cable.mount_path = nil
-# Rails.application.config.action_cable.url = 'wss://example.com/cable'
-# Rails.application.config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
+Rails.application.config.action_cable.mount_path = nil
+Rails.application.config.action_cable.url = 'wss://easychat.easycrm.top/cable'
 
-# To Enable connecting to the API channel public APIs
-# ref : https://medium.com/@emikaijuin/connecting-to-action-cable-without-rails-d39a8aaa52d5
+# List of allowed origins that can connect to Action Cable
+Rails.application.config.action_cable.allowed_request_origins = [
+  'https://development.controlfacilito.com', # Frontend en desarrollo con HTTPS
+  'http://development.controlfacilito.com',  # Frontend en desarrollo con HTTP
+  'https://www.controlfacilito.com'         # Dominio en producción
+]
+
+# Enable connecting to the API channel public APIs
+# Disables request forgery protection for Action Cable
 Rails.application.config.action_cable.disable_request_forgery_protection = true
+

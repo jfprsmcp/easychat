@@ -1,0 +1,24 @@
+RewriteEngine On
+
+# Redirección de HTTP a HTTPS (opcional pero recomendado)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{HTTP:Upgrade} =websocket [NC]
+RewriteCond %{HTTPS} on
+RewriteRule ^(.*)$ wss://144.208.66.171:3000/$1 [P,L]
+
+# Redirigir tráfico desde el puerto 3000 al puerto 443 (HTTPS)
+RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
+RewriteCond %{SERVER_PORT} =3000
+RewriteRule ^(.*)$ https://easychat.easycrm.top/$1 [L,R=301]
+
+# Redirigir el tráfico de WebSocket en HTTPS a la dirección correspondiente
+RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
+RewriteCond %{SERVER_PORT} =443
+RewriteRule ^(.*)$ http://144.208.66.171:3000/$1 [P,L]
+
+# Redirigir tráfico en el puerto 3035 a la dirección correspondiente
+RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
+RewriteCond %{SERVER_PORT} =3035
+RewriteRule ^(.*)$ http://144.208.66.171:3035/$1 [P,L]

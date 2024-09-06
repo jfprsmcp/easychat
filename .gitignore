@@ -75,3 +75,7 @@ yarn-debug.log*
 .yarn-integrity
 
 /storybook-static
+
+chatwoot-development.tar
+chatwoot-rails-development.tar
+chatwoot-webpack-development.tar

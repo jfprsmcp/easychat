@@ -66,6 +66,15 @@ Rails.application.configure do
   # customize using the environment variables
   config.log_level = ENV.fetch('LOG_LEVEL', 'debug').to_sym
 
+   # URL de Action Cable para desarrollo (usando wss para conexiones seguras)
+   config.action_cable.url = "wss://easychat.easycrm.top/cable"
+
+   # Permitimos los orígenes especificados
+   config.action_cable.allowed_request_origins = [
+     'https://easychat.easycrm.top',
+     'https://development.controlfacilito.com'
+   ]
+   
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
   config.logger = ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 1, ENV.fetch('LOG_SIZE', '1024').to_i.megabytes)
