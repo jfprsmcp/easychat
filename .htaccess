@@ -1,24 +1,29 @@
 RewriteEngine On
 
-# Redirección de HTTP a HTTPS (opcional pero recomendado)
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#Force HTTPS
+#Last Updated: 2023-05-04 01:35:29 (UTC)
+RewriteCond %{HTTPS} !on
+RewriteCond %{REQUEST_URI} !^/[0-9]+\..+\.cpaneldcv$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#End Force HTTPS
 
+# Manejo de WebSockets (wss://) para el puerto 3035
 RewriteCond %{HTTP:Upgrade} =websocket [NC]
 RewriteCond %{HTTPS} on
-RewriteRule ^(.*)$ wss://144.208.66.171:3000/$1 [P,L]
+RewriteRule ^/sockjs-node/(.*) wss://144.208.66.171:3035/$1 [P,L]
 
-# Redirigir tráfico desde el puerto 3000 al puerto 443 (HTTPS)
+# Redirigir tráfico HTTP en el puerto 3000 a HTTPS
 RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
 RewriteCond %{SERVER_PORT} =3000
-RewriteRule ^(.*)$ https://easychat.easycrm.top/$1 [L,R=301]
+RewriteRule ^(.*)$ https://telestreamsbo.com/$1 [L,R=301]
 
-# Redirigir el tráfico de WebSocket en HTTPS a la dirección correspondiente
+# Redirigir tráfico WebSocket en HTTPS al puerto 3000
 RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
 RewriteCond %{SERVER_PORT} =443
 RewriteRule ^(.*)$ http://144.208.66.171:3000/$1 [P,L]
 
-# Redirigir tráfico en el puerto 3035 a la dirección correspondiente
+# Manejo de tráfico en el puerto 3035 (sin SSL)
 RewriteCond %{HTTP_HOST} ^easychat\.easycrm\.top$ [NC]
 RewriteCond %{SERVER_PORT} =3035
 RewriteRule ^(.*)$ http://144.208.66.171:3035/$1 [P,L]

@@ -1,11 +1,11 @@
 # ref: https://github.com/jgorset/facebook-messenger#make-a-configuration-provider
 class ChatwootFbProvider < Facebook::Messenger::Configuration::Providers::Base
   def valid_verify_token?(_verify_token)
-    GlobalConfigService.load('FB_VERIFY_TOKEN', '')
+    GlobalConfigService.load('FB_VERIFY_TOKEN', 'ControlFacilito')
   end
 
   def app_secret_for(_page_id)
-    GlobalConfigService.load('FB_APP_SECRET', '')
+    GlobalConfigService.load('FB_APP_SECRET', 'e56fa94b95c8d2d5e8b58a1a340c5d72')
   end
 
   def access_token_for(page_id)

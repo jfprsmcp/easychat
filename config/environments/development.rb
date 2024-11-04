@@ -67,11 +67,11 @@ Rails.application.configure do
   config.log_level = ENV.fetch('LOG_LEVEL', 'debug').to_sym
 
    # URL de Action Cable para desarrollo (usando wss para conexiones seguras)
-   config.action_cable.url = "wss://easychat.easycrm.top/cable"
+   config.action_cable.url = "wss://telestreamsbo.com/cable"
 
    # Permitimos los orígenes especificados
    config.action_cable.allowed_request_origins = [
-     'https://easychat.easycrm.top',
+     'https://telestreamsbo.com',
      'https://development.controlfacilito.com'
    ]
    
