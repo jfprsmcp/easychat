@@ -71,8 +71,7 @@ Rails.application.configure do
 
    # Permitimos los orígenes especificados
    config.action_cable.allowed_request_origins = [
-     'https://telestreamsbo.com',
-     'https://development.controlfacilito.com'
+     'https://telestreamsbo.com'
    ]
    
   # Use a different logger for distributed setups.
