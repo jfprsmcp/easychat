@@ -13,6 +13,9 @@ export default {
       errorMessage: '', // Mensaje de error
       connectionState: 'Desconectado', // Estado de la conexión
       phoneNumber: '', // Número de WhatsApp conectado
+      inboxName: '', // Variable para el nombre del inbox (inicializado vacío)
+      sessionId: '', // Session ID (opcional)
+      userId: '', // User ID (opcional)
     };
   },
   methods: {
@@ -21,7 +24,6 @@ export default {
         if (this.qrCodeUrl) return; // Evita llamadas duplicadas
 
         const response = await axios.get('http://localhost:8181/generate-qr');
-
         if (response.data.qr) {
           this.qrCodeUrl = response.data.qr;
         } else {
@@ -35,18 +37,30 @@ export default {
     async fetchConnectionStatus() {
       try {
         const response = await axios.get('http://localhost:8181/status');
-        this.connectionState = response.data.status || 'Desconectado';
-        this.phoneNumber = response.data.phoneNumber || '';
+        const data = response.data;
+        this.connectionState = data.status || 'Desconectado';
+        this.phoneNumber = data.phoneNumber || '';
+        this.inboxName = data.inboxName || ''; // Asignar el nombre del inbox (vacío si no hay valor)
+        this.sessionId = data.sessionId || ''; // Asignar el Session ID
+        this.userId = data.userId || ''; // Asignar el User ID
       } catch (error) {
         console.error('Error al obtener el estado de conexión:', error);
         this.connectionState = 'Error';
       }
-    }
+    },
+    showConnectionStatus() {
+      // Mostrar la información de la conexión en un alert con los datos correctos
+      alert(`Estado de conexión: ${this.connectionState}\n` +
+            `Número de teléfono: ${this.phoneNumber}\n` +
+            `Nombre del inbox: ${this.inboxName}\n` +
+            `Session ID: ${this.sessionId}\n` +
+            `User ID: ${this.userId}`);
+    },
   },
   mounted() {
     this.fetchQRCode();
     this.fetchConnectionStatus();
-    setInterval(this.fetchConnectionStatus, 5000); // Consultar estado cada 5 segundos
+    setInterval(this.fetchConnectionStatus, 35000); // Actualiza el estado cada 35 segundos
   },
 };
 </script>
@@ -61,7 +75,13 @@ export default {
     <div class="w-[65%] flex-shrink-0 flex-grow-0 max-w-[65%]">
       <label class="flex flex-col gap-2">
         <span>{{ $t('INBOX_MGMT.ADD.WHATSAPP.INBOX_NAME.LABEL') }}:</span>
-        <input type="text" class="border p-2 rounded-md" :placeholder="$t('INBOX_MGMT.ADD.WHATSAPP.INBOX_NAME.PLACEHOLDER')" required/>
+        <input
+          type="text"
+          class="border p-2 rounded-md"
+          :placeholder="$t('INBOX_MGMT.ADD.WHATSAPP.INBOX_NAME.PLACEHOLDER')"
+          v-model="inboxName"
+          required
+        />
 
         <span>Estado de conexión:</span>
         <p :class="{'text-green-500': connectionState === 'Conectado', 'text-red-500': connectionState !== 'Conectado'}">
@@ -77,7 +97,8 @@ export default {
       </label>
 
       <div class="w-full">
-        <button>Crear canal</button>
+        <!-- Botón para mostrar información de la conexión -->
+        <button @click="showConnectionStatus">Crear canal</button>
       </div>
     </div>
   </div>
