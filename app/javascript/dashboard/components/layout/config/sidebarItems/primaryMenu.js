@@ -65,6 +65,13 @@ const primaryMenuItems = accountId => [
     toState: frontendURL(`accounts/${accountId}/settings`),
     toStateName: 'settings_home',
   },
+  {
+    icon: 'info',
+    key: 'settings',
+    label: 'PRIVACY_POLICIES',
+    toState: frontendURL(`EasyContactPolicies`),
+    toStateName: 'settings_home',
+  },
 ];
 
 export default primaryMenuItems;
