@@ -1,6 +1,11 @@
 <script>
 export default {
   name: 'EasyContactPolicies',
+  methods: {
+    goBack() {
+      window.history.back();
+    }
+  }
 };
 </script>
 <template>
@@ -89,6 +94,9 @@ export default {
           Si un usuario desea eliminar permanentemente su cuenta y los datos asociados, puede realizar la solicitud de eliminación a través de <a href="mailto:servicios@easycontact.com">servicios@easycontact.com</a>.
         </p>
       </section>
+      <div class="back-button-container">
+        <button @click="goBack" class="back-button">Volver</button>
+      </div>
     </div>
   </div>
 </template>
@@ -151,5 +159,19 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.back-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
 }
 </style>

@@ -227,6 +227,7 @@
     }
   },
   "SIDEBAR": {
+    "PRIVACY_POLICIES":"Privacy Policies",
     "CURRENTLY_VIEWING_ACCOUNT": "Visualizando:",
     "SWITCH": "Cambiar",
     "INBOX_VIEW": "Vista del buzón",

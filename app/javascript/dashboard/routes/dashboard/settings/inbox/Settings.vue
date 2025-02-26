@@ -122,7 +122,8 @@ export default {
         this.isAMicrosoftInbox ||
         this.isAGoogleInbox ||
         this.isAWhatsAppChannel ||
-        this.isAWebWidgetInbox
+        this.isAWebWidgetInbox ||
+        this.isWhatsappWeb
       ) {
         visibleToAllChannelTabs = [
           ...visibleToAllChannelTabs,
