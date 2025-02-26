@@ -39,6 +39,7 @@ export default {
         'sms',
         'telegram',
         'line',
+        'whatsappweb',
       ].includes(key);
     },
   },
@@ -50,7 +51,7 @@ export default {
       return `/assets/images/dashboard/channels/${this.channel.key}.png`;
     },
     onItemClick() {
-      if (this.isActive) {
+      if (this.isActive ) {
         this.$emit('channelItemClick', this.channel.key);
       }
     },
