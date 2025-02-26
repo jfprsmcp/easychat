@@ -23,7 +23,7 @@ end
 
 # Mount Action Cable outside main process or domain
 Rails.application.config.action_cable.mount_path = nil
-Rails.application.config.action_cable.url = 'wss://telestreamsbo.com/cable'
+Rails.application.config.action_cable.url = 'wss://easycontact.top/cable'
 
 # List of allowed origins that can connect to Action Cable
 Rails.application.config.action_cable.allowed_request_origins = [
