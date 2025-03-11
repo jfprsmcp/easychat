@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'index', to: proc { [200, { 'Content-Type' => 'text/html' }, [File.read(Rails.public_path.join('LandingPage', 'index.html'))]] }
   mount ActionCable.server => "/cable"
   # AUTH STARTS
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
@@ -14,7 +15,8 @@ Rails.application.routes.draw do
     root to: 'api#index'
   else
     root to: 'dashboard#index'
-
+    get '/app/prompts', to: 'prompts#prompts'
+    get '/app/prompts/:id', to: 'prompts#show_prompt', as: :prompt
     get '/app', to: 'dashboard#index'
     get '/app/*params', to: 'dashboard#index'
     get '/app/accounts/:account_id/settings/inboxes/new/twitter', to: 'dashboard#index', as: 'app_new_twitter_inbox'
@@ -79,6 +81,7 @@ Rails.application.routes.draw do
           resources :dashboard_apps, only: [:index, :show, :create, :update, :destroy]
           namespace :channels do
             resource :twilio_channel, only: [:create]
+            resource :whatsapp_web, only: [:create], controller: 'whatsapp_web_channels'
           end
           resources :conversations, only: [:index, :create, :show, :update] do
             collection do
