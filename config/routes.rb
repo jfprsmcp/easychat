@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get 'index', to: proc { [200, { 'Content-Type' => 'text/html' }, [File.read(Rails.public_path.join('LandingPage', 'index.html'))]] }
+  get '/', to: proc { [200, { 'Content-Type' => 'text/html' }, [File.read(Rails.public_path.join('LandingPage', 'index.html'))]] }
   mount ActionCable.server => "/cable"
   # AUTH STARTS
   mount_devise_token_auth_for 'User', at: 'auth', controllers: {
