@@ -1,0 +1,2 @@
+sudo chmod +x monitor_chatwoot.sh
+sudo nohup ./monitor_chatwoot.sh > monitor.log 2>&1 &
