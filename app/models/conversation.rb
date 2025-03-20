@@ -24,6 +24,7 @@
 #  campaign_id            :bigint
 #  contact_id             :bigint
 #  contact_inbox_id       :bigint
+#  conversations_state_id :integer
 #  display_id             :integer          not null
 #  inbox_id               :integer          not null
 #  sla_policy_id          :bigint
