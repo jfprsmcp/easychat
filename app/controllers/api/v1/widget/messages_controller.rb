@@ -1,15 +1,35 @@
 class Api::V1::Widget::MessagesController < Api::V1::Widget::BaseController
   before_action :set_conversation, only: [:create]
   before_action :set_message, only: [:update]
+  COUNT_MESSAGE_CONVERSATION = 15 
 
   def index
     @messages = conversation.nil? ? [] : message_finder.perform
   end
 
   def create
+    assigned_state_conversation
     @message = conversation.messages.new(message_params)
     build_attachment
     @message.save!
+  end
+
+  def assigned_state_conversation
+    if conversation.conversations_state_id.present?
+      return 
+    end
+    override_messages = Message.where(account_id: conversation.account_id,inbox_id: conversation.inbox_id,conversation_id: conversation.id)
+                                .offset(COUNT_MESSAGE_CONVERSATION).exists?
+    if(!override_messages)
+      return
+    end
+    # fetch ia
+    state_assigned_by_agent_ia = "state_test"
+    conversation_state = ConversationState.find_by(name: state_assigned_by_agent_ia)
+    if conversation_state.nil?
+      return
+    end
+    conversation.update(conversations_state_id: conversation_state.id)
   end
 
   def update
