@@ -3,7 +3,7 @@
 # https://developers.facebook.com/docs/whatsapp/api/media/
 class Whatsapp::IncomingMessageBaseService
   include ::Whatsapp::IncomingMessageServiceHelpers
-
+  COUNT_MESSAGE_CONVERSATION = 15 
   pattr_initialize [:inbox!, :params!]
 
   def perform
@@ -141,6 +141,7 @@ class Whatsapp::IncomingMessageBaseService
   end
 
   def create_message(message)
+    assigned_state_conversation
     @message = @conversation.messages.build(
       content: message_content(message),
       account_id: @inbox.account_id,
@@ -150,6 +151,24 @@ class Whatsapp::IncomingMessageBaseService
       source_id: message[:id].to_s,
       in_reply_to_external_id: @in_reply_to_external_id
     )
+  end
+
+  def assigned_state_conversation
+    if @conversation.conversations_state_id.present?
+      return
+    end
+    override_messages = Message.where(account_id: @conversation.account_id,inbox_id: @conversation.inbox_id,conversation_id: @conversation.id)
+                                .offset(COUNT_MESSAGE_CONVERSATION).exists?
+    if(!override_messages)
+      return
+    end
+    # fetch ia
+    state_assigned_by_agent_ia = "state_test"
+    conversation_state = ConversationState.find_by(name: state_assigned_by_agent_ia)
+    if conversation_state.nil?
+      return
+    end
+    @conversation.update(conversations_state_id: conversation_state.id)
   end
 
   def attach_contact(contact)
