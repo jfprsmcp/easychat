@@ -50,7 +50,7 @@ export default {
     class="px-0 py-3 flex justify-center"
   >
     <a
-      :href="brandRedirectURL"
+      :href="'https://www.easycontact.top'"
       rel="noreferrer noopener nofollow"
       target="_blank"
       class="branding--link justify-center items-center leading-3"
@@ -61,7 +61,8 @@ export default {
         :src="globalConfig.logoThumbnail"
       />
       <span>
-        {{ useInstallationName($t('POWERED_BY'), globalConfig.brandName) }}
+        <!-- {{ useInstallationName($t('POWERED_BY'), globalConfig.brandName) }} -->
+        Powered by EasyContact
       </span>
     </a>
   </div>
