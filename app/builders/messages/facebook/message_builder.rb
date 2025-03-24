@@ -6,7 +6,7 @@
 
 class Messages::Facebook::MessageBuilder < Messages::Messenger::MessageBuilder
   attr_reader :response
-
+  COUNT_MESSAGE_CONVERSATION = 15 
   def initialize(response, inbox, outgoing_echo: false)
     super()
     @response = response
@@ -45,11 +45,30 @@ class Messages::Facebook::MessageBuilder < Messages::Messenger::MessageBuilder
   end
 
   def build_message
+    assigned_state_conversation
     @message = conversation.messages.create!(message_params)
 
     @attachments.each do |attachment|
       process_attachment(attachment)
     end
+  end
+
+  def assigned_state_conversation
+    if conversation.conversations_state_id.present?
+      return 
+    end
+    override_messages = Message.where(account_id: conversation.account_id,inbox_id: conversation.inbox_id,conversation_id: conversation.id)
+                                .offset(COUNT_MESSAGE_CONVERSATION).exists?
+    if(!override_messages)
+      return
+    end
+    # fetch ia
+    state_assigned_by_agent_ia = "state_test"
+    conversation_state = ConversationState.find_by(name: state_assigned_by_agent_ia)
+    if conversation_state.nil?
+      return
+    end
+    conversation.update(conversations_state_id: conversation_state.id)
   end
 
   def conversation
