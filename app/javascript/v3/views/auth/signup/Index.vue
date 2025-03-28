@@ -40,17 +40,23 @@ export default {
       >
         <div class="px-8 max-w-[560px] w-full overflow-auto">
           <div class="mb-4">
-            <img
+            <div class="flex items-center gap-2">
+              <img
               :src="globalConfig.logo"
               :alt="globalConfig.installationName"
-              class="block w-auto h-8 dark:hidden"
-            />
-            <img
+              class="block w-auto h-14 dark:hidden"
+              />
+              <h6 class="block dark:hidden text-xl font-bold">EasyContact</h6>
+            </div>
+            <div class="flex items-center gap-2">
+              <img
               v-if="globalConfig.logoDark"
               :src="globalConfig.logoDark"
               :alt="globalConfig.installationName"
-              class="hidden w-auto h-8 dark:block"
-            />
+              class="hidden w-auto h-14 dark:block"
+              />
+              <h6 class="hidden dark:block text-xl text-white font-bold">EasyContact</h6>
+            </div>
             <h2
               class="mt-6 text-3xl font-medium text-left mb-7 text-slate-900 dark:text-woot-50"
             >
@@ -85,3 +91,14 @@ export default {
     </div>
   </div>
 </template>
+
+<style>
+.text-woot-darker {
+  --tw-text-opacity: 1;
+  color: rgb(8 110 182 / var(--tw-text-opacity, 1));
+}
+.text-woot-darker:hover {
+  --tw-text-opacity: 0.8;
+  color: rgb(8 110 182 / var(--tw-text-opacity, 1));
+}
+</style>

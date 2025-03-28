@@ -33,7 +33,7 @@ export default {
   },
   DOCS_URL: '//www.chatwoot.com/docs/product/',
   HELP_CENTER_DOCS_URL: '//www.chatwoot.com/docs/product/others/help-center',
-  TESTIMONIAL_URL: 'https://testimonials.cdn.chatwoot.com/content.json',
+  TESTIMONIAL_URL: '/testimonial/data.json',
   SMALL_SCREEN_BREAKPOINT: 1024,
   AVAILABILITY_STATUS_KEYS: ['online', 'busy', 'offline'],
   SNOOZE_OPTIONS: {

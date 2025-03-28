@@ -163,7 +163,7 @@ export default {
         class="mt-3 text-sm text-center text-slate-600 dark:text-slate-400"
       >
         {{ $t('COMMON.OR') }}
-        <router-link to="auth/signup" class="lowercase text-link">
+        <router-link to="auth/signup" class="lowercase text-link text-woot-darker">
           {{ $t('LOGIN.CREATE_NEW_ACCOUNT') }}
         </router-link>
       </p>
@@ -205,7 +205,7 @@ export default {
             <p v-if="!globalConfig.disableUserProfileUpdate">
               <router-link
                 to="auth/reset/password"
-                class="text-sm text-link"
+                class="text-sm text-link text-woot-darker"
                 tabindex="4"
               >
                 {{ $t('LOGIN.FORGOT_PASSWORD') }}
@@ -226,3 +226,13 @@ export default {
     </section>
   </main>
 </template>
+<style>
+.text-woot-darker {
+  --tw-text-opacity: 1;
+  color: rgb(8 110 182 / var(--tw-text-opacity, 1));
+}
+.text-woot-darker:hover {
+  --tw-text-opacity: 0.8;
+  color: rgb(8 110 182 / var(--tw-text-opacity, 1));
+}
+</style>
