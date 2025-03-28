@@ -3,6 +3,10 @@ import { getInboxClassByType } from 'dashboard/helper/inbox';
 
 export default {
   props: {
+    show_state:{
+      type: Boolean,
+      default:false
+    },
     conversation_state: {
       type: String,
       default: null 
@@ -32,8 +36,15 @@ export default {
       size="12"
     />
     {{ inbox.name }}
-    <span v-if="conversation_state" class="text-xs inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
+    <template v-if="conversation_state && show_state">
+      <span class="text-xs inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
         {{ conversation_state }}
-    </span>
+      </span>
+    </template>
+    <template v-else-if="show_state">
+      <span class="text-xs inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">
+          no categorizada
+      </span>
+    </template>
   </div>
 </template>
