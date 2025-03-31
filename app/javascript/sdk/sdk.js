@@ -39,7 +39,7 @@ export const SDK_CSS = `
 }
 
 .woot-widget-bubble {
-  background: #1f93ff;
+  background:  rgb(10,111,183,0.9) !important;
   border-radius: 100px;
   border-width: 0px;
   bottom: 20px;
@@ -128,15 +128,15 @@ export const SDK_CSS = `
 }
 
 .woot-widget-bubble:hover {
-  background: #1f93ff;
+  background: background:  rgb(10,111,183,1) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, .4) !important;
 }
 
 .woot-widget-bubble svg {
   all: revert;
-  height: 24px;
-  margin: 20px;
-  width: 24px;
+  height: 40px;
+  margin-top: 5px;
+  width: 40px;
 }
 
 .woot-widget-bubble.woot-widget-bubble-color--lighter path{
