@@ -140,7 +140,12 @@ class Message < ApplicationRecord
       message_type: message_type_before_type_cast,
       conversation_id: conversation.display_id,
       conversation: conversation_push_event_data,
-      conversations_state_name: conversation.conversation_state&.name
+      conversations_state_name: conversation.conversation_state&.name,
+      conversations_state: {
+        name:conversation.conversation_state&.name,
+        color:conversation.conversation_state&.color,
+        description:conversation.conversation_state&.description
+      }
     )
     data[:echo_id] = echo_id if echo_id.present?
     data[:attachments] = attachments.map(&:push_event_data) if attachments.present?

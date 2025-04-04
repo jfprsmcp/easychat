@@ -20,6 +20,18 @@ json.meta do
   json.hmac_verified conversation.contact_inbox&.hmac_verified
 end
 json.conversations_state_name conversation.conversations_state_id ? ConversationState.where(id: conversation.conversations_state_id).pick(:name) : nil
+json.conversations_state do 
+  if conversation.conversations_state_id
+    state = ConversationState.find(conversation.conversations_state_id)
+    json.name state.name
+    json.description state.description
+    json.color state.color
+  else
+    json.name nil
+    json.description nil
+    json.color nil
+  end
+end
 json.id conversation.display_id
 if conversation.messages.where(account_id: conversation.account_id).last.blank?
   json.messages []
