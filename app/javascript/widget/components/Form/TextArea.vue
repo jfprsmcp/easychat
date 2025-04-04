@@ -45,25 +45,24 @@ export default {
     onChange(event) {
       this.$emit('input', event.target.value);
     },
+    onBlur(event) { 
+      this.$emit('blur', event.target.value);
+    }
   },
 };
 </script>
 
 <template>
-  <label class="block">
-    <div
-      v-if="label"
-      class="mb-2 text-xs font-medium leading-3"
-      :class="labelClass"
-    >
-      {{ label }}
-    </div>
+  <label class="input-container">
+    <span v-if="label">{{ label }}</span>
     <textarea
       class="w-full px-3 py-2 leading-tight border rounded outline-none resize-none text-slate-700"
       :class="isTextAreaHasError"
       :placeholder="placeholder"
       :value="value"
       @change="onChange"
+      @input="onChange"
+      @blur="onBlur"
     />
     <div v-if="error" class="mt-2 text-xs font-medium leading-3 text-red-400">
       {{ error }}
@@ -74,5 +73,6 @@ export default {
 <style lang="scss" scoped>
 textarea {
   min-height: 8rem;
+  resize: vertical;
 }
 </style>

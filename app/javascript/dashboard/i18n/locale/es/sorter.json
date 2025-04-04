@@ -1,0 +1,69 @@
+{
+    "SORTER":{
+        "HEADER":"Clasificador de conversación",
+        "HEADER_BTN_TXT": "Añadir clasificador",
+        "LOADING": "Obteniendo clasificadores",
+        "LIST": {
+            "404": "No hay clasificadores disponibles en esta cuenta.",
+            "TITLE": "Administrar clasificadores",
+            "DESC": "Los clasificadores permiten analizar las conversaciones automáticamente.",
+            "TABLE_HEADER": [
+                "Nombre",
+                "Descripción",
+                "Color"
+            ]
+        },
+        "DESCRIPTION": "Los clasificadores te ayudan a identificar de forma rápida y clara el contexto de cada conversación sin necesidad de entrar en ella.",
+        "LEARN_MORE": "Obtenga más información sobre los clasificadores",
+        "FORM": {
+            "NAME": {
+                "LABEL": "Clasificador Nombre",
+                "PLACEHOLDER": "Clasificador nombre",
+                "REQUIRED_ERROR": "Clasificador nombre es requerido",
+                "MINIMUM_LENGTH_ERROR": "Se requiere una longitud mínima de 2",
+                "VALID_ERROR": "Solo se permiten letras, números, guiones y guiones bajos."
+            },
+            "DESCRIPTION": {
+                "LABEL": "Clasificador Descripcion",
+                "REQUIRED_ERROR": "Clasificador descripcion es requerido",
+                "MINIMUM_LENGTH_ERROR": "Se requiere una longitud mínima de 10",
+                "PLACEHOLDER": "Clasificador descripcion"
+            },
+            "COLOR": {
+                "LABEL": "Color"
+            },
+            "EDIT": "Editar",
+            "CREATE": "Crear",
+            "DELETE": "Eliminar",
+            "CANCEL": "Cancelar"
+        },
+        "ADD": {
+            "TITLE": "Añadir clasificador",
+            "DESC": "Los clasificadores permiten analizar conversaciones",
+            "API": {
+                "SUCCESS_MESSAGE": "Clasificador agregado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            }
+        },
+        "EDIT": {
+            "TITLE": "Editar clasificador",
+            "API": {
+                "SUCCESS_MESSAGE": "Clasificador actualizado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            }
+        },
+        "DELETE": {
+            "BUTTON_TEXT": "Eliminar",
+            "API": {
+                "SUCCESS_MESSAGE": "Clasificador eliminado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            },
+            "CONFIRM": {
+                "TITLE": "Confirmar eliminación",
+                "MESSAGE": "¿Estás seguro de eliminar? ",
+                "YES": "Sí, eliminar ",
+                "NO": "No, mantenerlo"
+            }
+        }
+    }
+}

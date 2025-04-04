@@ -39,6 +39,7 @@ const settings = accountId => ({
     'settings_teams_list',
     'settings_teams_new',
     'sla_list',
+    'sorter_list'
   ],
   menuItems: [
     {
@@ -94,6 +95,16 @@ const settings = accountId => ({
       toState: frontendURL(`accounts/${accountId}/settings/labels/list`),
       toStateName: 'labels_list',
       featureFlag: FEATURE_FLAGS.LABELS,
+    },
+    {
+      icon: 'book-contacts',
+      label: 'SORTER',
+      hasSubMenu: false,
+      meta: {
+        permissions: ['administrator'],
+      },
+      toState: frontendURL(`accounts/${accountId}/settings/sorter`),
+      toStateName: 'sorter_list',
     },
     {
       icon: 'code',

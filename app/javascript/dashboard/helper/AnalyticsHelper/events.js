@@ -29,6 +29,13 @@ export const LABEL_EVENTS = Object.freeze({
   APPLY_LABEL: 'Applied a label',
 });
 
+export const SORTER_EVENTS = Object.freeze({
+  CREATE: 'Created a sorter',
+  UPDATE: 'Updated a sorter',
+  DELETED: 'Deleted a sorter',
+  APPLY_LABEL: 'Applied a sorter',
+});
+
 // REPORTS EVENTS
 export const REPORTS_EVENTS = Object.freeze({
   DOWNLOAD_REPORT: 'Downloaded a report',

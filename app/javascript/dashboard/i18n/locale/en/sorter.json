@@ -1,0 +1,67 @@
+{
+    "SORTER": {
+        "HEADER": "Sorter conversation",
+        "HEADER_BTN_TXT": "Add sorter",
+        "LOADING": "Fetching sorters",
+        "LIST": {
+            "404": "There are no sorters available in this account.",
+            "TITLE": "Manage sorters",
+            "DESC": "Classifiers allow conversations to be analyzed automatically.",
+            "TABLE_HEADER": [
+                "Name",
+                "Description",
+                "Color"
+            ]
+        },
+        "DESCRIPTION": "Classifiers help you quickly and clearly identify the context of each conversation without having to enter it.",
+        "LEARN_MORE": "Learn more about sorters",
+        "FORM": {
+            "NAME": {
+                "LABEL": "Sorter Name",
+                "PLACEHOLDER": "Sorter name",
+                "REQUIRED_ERROR": "Sorter name is required",
+                "MINIMUM_LENGTH_ERROR": "Minimum length 2 is required",
+                "VALID_ERROR": "Only Alphabets, Numbers, Hyphen and Underscore are allowed"
+            },
+            "DESCRIPTION": {
+                "LABEL": "Sorter Description",
+                "PLACEHOLDER": "Sorter description"
+            },
+            "COLOR": {
+                "LABEL": "Color"
+            },
+            "EDIT": "Edit",
+            "CREATE": "Create",
+            "DELETE": "Delete",
+            "CANCEL": "Cancel"
+        },
+        "ADD": {
+            "TITLE": "Add sorter",
+            "DESC": "Classifiers allow you to analyze conversations",
+            "API": {
+                "SUCCESS_MESSAGE": "Sorter added successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            }
+        },
+        "EDIT": {
+            "TITLE": "Edit sorter",
+            "API": {
+                "SUCCESS_MESSAGE": "Sorter updated successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            }
+        },
+        "DELETE": {
+            "BUTTON_TEXT": "Delete",
+            "API": {
+                "SUCCESS_MESSAGE": "Sorter deleted successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            },
+            "CONFIRM": {
+                "TITLE": "Confirm Deletion",
+                "MESSAGE": "Are you sure to delete ",
+                "YES": "Yes, Delete ",
+                "NO": "No, Keep "
+            }
+        }
+    }
+}

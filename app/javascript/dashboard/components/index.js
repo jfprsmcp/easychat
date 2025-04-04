@@ -25,7 +25,7 @@ import Tabs from './ui/Tabs/Tabs';
 import TabsItem from './ui/Tabs/TabsItem';
 import Thumbnail from './widgets/Thumbnail.vue';
 import DatePicker from './ui/DatePicker/DatePicker.vue';
-
+import TextArea from '../../widget/components/Form/TextArea.vue';
 const WootUIKit = {
   AvatarUploader,
   Bar,
@@ -53,6 +53,7 @@ const WootUIKit = {
   TabsItem,
   Thumbnail,
   DatePicker,
+  TextArea,
   install(Vue) {
     const keys = Object.keys(this);
     keys.pop(); // remove 'install' from keys
