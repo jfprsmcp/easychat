@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_19_141958) do
+ActiveRecord::Schema[7.0].define(version: 2025_04_03_211636) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -452,6 +452,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_19_141958) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "account_id"
+    t.string "color"
+    t.text "description"
   end
 
   create_table "conversations", id: :serial, force: :cascade do |t|

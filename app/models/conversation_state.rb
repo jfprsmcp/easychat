@@ -2,11 +2,17 @@
 #
 # Table name: conversation_states
 #
-#  id         :bigint           not null, primary key
-#  name       :string
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id          :bigint           not null, primary key
+#  color       :string
+#  description :text
+#  name        :string
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  account_id  :integer
 #
 class ConversationState < ApplicationRecord
     validates :name, presence: true, uniqueness: true
+    validates :description, presence: true
+    validates :color, presence: true
+    validates :account_id, presence: true
 end
