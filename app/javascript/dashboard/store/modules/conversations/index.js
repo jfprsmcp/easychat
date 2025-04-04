@@ -193,6 +193,7 @@ export const mutations = {
       Vue.set(chat.messages, pendingMessageIndex, message);
     } else {
       chat.conversations_state_name = message.conversations_state_name;
+      chat.conversations_state = message.conversations_state;
       chat.messages.push(message);
       chat.timestamp = message.created_at;
       const { conversation: { unread_count: unreadCount = 0 } = {} } = message;

@@ -8,7 +8,7 @@ export default {
       default:false
     },
     conversation_state: {
-      type: String,
+      type: Object,
       default: null 
     },
     inbox: {
@@ -36,13 +36,13 @@ export default {
       size="12"
     />
     {{ inbox.name }}
-    <template v-if="conversation_state && show_state">
-      <span class="text-xs inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">
-        {{ conversation_state }}
+    <template v-if="conversation_state && conversation_state.name && show_state">
+      <span :style="{ backgroundColor: conversation_state.color }" class="text-xs inline-flex items-center rounded-md px-2 py-1 text-slate-900 dark:text-slate-100 font-medium">
+        {{ conversation_state.name }}
       </span>
     </template>
     <template v-else-if="show_state">
-      <span class="text-xs inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset">
+      <span class="text-xs inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-gray-500/10 ring-inset">
           no categorizada
       </span>
     </template>

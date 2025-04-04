@@ -40,11 +40,6 @@ export const actions = {
     get: async function getSorter({ commit }) {
         commit(types.SET_SORTER_UI_FLAG, { isFetching: true });
         try {
-            console.log({
-                resource: SorterAPI.resource,
-                options: SorterAPI.options,
-                url: SorterAPI.url
-            })
             const response = await SorterAPI.get();
             const sortedSorter = response.data.payload.sort((a, b) =>
                 a.name.localeCompare(b.name)
