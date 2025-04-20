@@ -174,6 +174,11 @@ Rails.application.routes.draw do
           end
           resources :labels, only: [:index, :show, :create, :update, :destroy]
           resources :conversation_states, only: [:index, :show, :create, :update, :destroy]
+          resources :kanban_states, only: [:index, :create, :update, :destroy] do
+            collection do
+              put :update_order_batch
+            end
+          end
           resources :response_sources, only: [:create] do
             collection do
               post :parse

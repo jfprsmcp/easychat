@@ -27,6 +27,7 @@
 #  conversations_state_id :integer
 #  display_id             :integer          not null
 #  inbox_id               :integer          not null
+#  kanban_states_id       :integer
 #  sla_policy_id          :bigint
 #  team_id                :bigint
 #

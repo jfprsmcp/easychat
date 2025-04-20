@@ -86,9 +86,28 @@ class ConversationFinder
   end
 
   def find_all_conversations
+    filter = params[:group] || "inbox"
+    if filter=="inbox"
+      find_conversation_inbox
+    elsif filter=="kanban"
+      find_conversation_kanban_states
+    end
+  end
+
+  def find_conversation_inbox
     @conversations = current_account.conversations.where(inbox_id: @inbox_ids)
     filter_by_conversation_type if params[:conversation_type]
     @conversations
+  end
+
+  def find_conversation_kanban_states
+    kanban_state_param = params[:group_id]
+    if kanban_state_param.nil?
+      @conversations = current_account.conversations.where(kanban_states_id: nil)
+    else
+      @conversations = current_account.conversations.where(kanban_states_id: kanban_state_param)
+    end
+    filter_by_conversation_type if params[:conversation_type]
   end
 
   def filter_by_assignee_type
