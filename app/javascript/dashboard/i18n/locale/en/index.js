@@ -34,6 +34,7 @@ import inbox from './inbox.json';
 import general from './general.json';
 import datePicker from './datePicker.json';
 import sorter from './sorter.json';
+import board from './board.json';
 
 export default {
   ...advancedFilters,
@@ -72,4 +73,5 @@ export default {
   ...general,
   ...datePicker,
   ...sorter,
+  ...board
 };

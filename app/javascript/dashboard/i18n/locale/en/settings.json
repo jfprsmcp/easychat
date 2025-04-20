@@ -234,6 +234,7 @@
     "CONVERSATIONS": "Conversations",
     "INBOX": "Inbox",
     "ALL_CONVERSATIONS": "All Conversations",
+    "BOARD": "Board",
     "MENTIONED_CONVERSATIONS": "Mentions",
     "PARTICIPATING_CONVERSATIONS": "Participating",
     "UNATTENDED_CONVERSATIONS": "Unattended",

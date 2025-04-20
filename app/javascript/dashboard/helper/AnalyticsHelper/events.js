@@ -36,6 +36,12 @@ export const SORTER_EVENTS = Object.freeze({
   APPLY_LABEL: 'Applied a sorter',
 });
 
+export const KANBAN_STATE_EVENTS = Object.freeze({
+  CREATE: 'Created a kanban state',
+  UPDATE: 'Updated a kanban state',
+  DELETED: 'Deleted a kanban state',
+  APPLY_LABEL: 'Applied a kanban state',
+});
 // REPORTS EVENTS
 export const REPORTS_EVENTS = Object.freeze({
   DOWNLOAD_REPORT: 'Downloaded a report',

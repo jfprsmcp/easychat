@@ -1,0 +1,62 @@
+{
+    "BOARD": {
+        "HEADER": "Tablero de conversacion",
+        "HEADER_BTN_TXT": "Añadir estado",
+        "LOADING": "Obteniendo estados",
+        "LIST": {
+            "404": "No hay estados disponibles en esta cuenta.",
+            "TITLE": "Administrar estados",
+            "DESC": "Los estados del tablero permiten analizar el nivel o etapa en la que se encuentra cada conversación.",
+            "TABLE_HEADER": [
+                "Nombre",
+                "Color"
+            ]
+        },
+        "DESCRIPTION": "Los estados del tablero permiten analizar el nivel o etapa en la que se encuentra cada conversación.",
+        "LEARN_MORE": "Obtenga más información sobre los estados de tablero",
+        "FORM": {
+            "NAME": {
+                "LABEL": "Estado Nombre",
+                "PLACEHOLDER": "Estado nombre",
+                "REQUIRED_ERROR": "Estado nombre es requrido",
+                "MINIMUM_LENGTH_ERROR": "Se requiere una longitud mínima de 3",
+                "VALID_ERROR": "Solo se permiten letras, números, guiones y guiones bajos."
+            },
+            "COLOR": {
+                "LABEL": "Color"
+            },
+            "EDIT": "Editar",
+            "CREATE": "Crear",
+            "DELETE": "Eliminar",
+            "CANCEL": "Cancelar"
+        },
+        "ADD": {
+            "TITLE": "Añadir estado",
+            "DESC": "Los estados permiten analizar la etapa en la que se encuentra la conversación.",
+            "API": {
+                "SUCCESS_MESSAGE": "Estado agregado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            }
+        },
+        "EDIT": {
+            "TITLE": "Editar estado",
+            "API": {
+                "SUCCESS_MESSAGE": "Estado actualizado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            }
+        },
+        "DELETE": {
+            "BUTTON_TEXT": "Eliminar",
+            "API": {
+                "SUCCESS_MESSAGE": "Estado eliminado exitosamente",
+                "ERROR_MESSAGE": "Hubo un error, por favor inténtalo de nuevo."
+            },
+            "CONFIRM": {
+                "TITLE": "Confirmar eliminación",
+                "MESSAGE": "¿Estás seguro de eliminar? ",
+                "YES": "Sí, eliminar ",
+                "NO": "No, mantenerlo"
+            }
+        }
+    }
+}

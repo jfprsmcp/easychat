@@ -39,7 +39,8 @@ const settings = accountId => ({
     'settings_teams_list',
     'settings_teams_new',
     'sla_list',
-    'sorter_list'
+    'sorter_list',
+    'board_list',
   ],
   menuItems: [
     {
@@ -105,6 +106,16 @@ const settings = accountId => ({
       },
       toState: frontendURL(`accounts/${accountId}/settings/sorter`),
       toStateName: 'sorter_list',
+    },
+    {
+      icon: 'board',
+      label: 'BOARD',
+      hasSubMenu: false,
+      meta: {
+        permissions: ['administrator'],
+      },
+      toState: frontendURL(`accounts/${accountId}/settings/board`),
+      toStateName: 'board_list',
     },
     {
       icon: 'code',
@@ -217,3 +228,4 @@ const settings = accountId => ({
 });
 
 export default settings;
+

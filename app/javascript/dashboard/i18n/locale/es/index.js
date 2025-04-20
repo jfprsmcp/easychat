@@ -30,6 +30,7 @@ import signup from './signup.json';
 import teamsSettings from './teamsSettings.json';
 import whatsappTemplates from './whatsappTemplates.json';
 import sorter from './sorter.json';
+import board from './board.json';
 
 export default {
   ...advancedFilters,
@@ -63,5 +64,6 @@ export default {
   ...signup,
   ...teamsSettings,
   ...whatsappTemplates,
-  ...sorter
+  ...sorter,
+  ...board
 };

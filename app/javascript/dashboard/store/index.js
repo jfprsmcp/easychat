@@ -46,6 +46,7 @@ import webhooks from './modules/webhooks';
 import draftMessages from './modules/draftMessages';
 import SLAReports from './modules/SLAReports';
 import sorter from './modules/sorter';
+import kanbanState from './modules/kanbanState';
 
 const plugins = [];
 
@@ -96,7 +97,8 @@ export default new Vuex.Store({
     draftMessages,
     sla,
     slaReports: SLAReports,
-    sorter
+    sorter,
+    kanbanState
   },
   plugins,
 });

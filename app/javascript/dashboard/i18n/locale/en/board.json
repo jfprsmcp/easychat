@@ -1,0 +1,62 @@
+{
+    "BOARD": {
+        "HEADER": "Board conversation",
+        "HEADER_BTN_TXT": "Add state",
+        "LOADING": "Fetching states",
+        "LIST": {
+            "404": "There are no states available in this account.",
+            "TITLE": "Manage states",
+            "DESC": "The states of the board allow you to analyze the level or stage at which each conversation is located.",
+            "TABLE_HEADER": [
+                "Name",
+                "Color"
+            ]
+        },
+        "DESCRIPTION": "The states of the board allow you to analyze the level or stage at which each conversation is located.",
+        "LEARN_MORE": "Learn more about states board",
+        "FORM": {
+            "NAME": {
+                "LABEL": "State Name",
+                "PLACEHOLDER": "State name",
+                "REQUIRED_ERROR": "State name is required",
+                "MINIMUM_LENGTH_ERROR": "Minimum length 2 is required",
+                "VALID_ERROR": "Only Alphabets, Numbers, Hyphen and Underscore are allowed"
+            },
+            "COLOR": {
+                "LABEL": "Color"
+            },
+            "EDIT": "Edit",
+            "CREATE": "Create",
+            "DELETE": "Delete",
+            "CANCEL": "Cancel"
+        },
+        "ADD": {
+            "TITLE": "Add state",
+            "DESC": "Statuses allow you to analyze the stage of the conversation.",
+            "API": {
+                "SUCCESS_MESSAGE": "State added successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            }
+        },
+        "EDIT": {
+            "TITLE": "Edit state",
+            "API": {
+                "SUCCESS_MESSAGE": "State updated successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            }
+        },
+        "DELETE": {
+            "BUTTON_TEXT": "Delete",
+            "API": {
+                "SUCCESS_MESSAGE": "State deleted successfully",
+                "ERROR_MESSAGE": "There was an error, please try again"
+            },
+            "CONFIRM": {
+                "TITLE": "Confirm Deletion",
+                "MESSAGE": "Are you sure to delete ",
+                "YES": "Yes, Delete ",
+                "NO": "No, Keep "
+            }
+        }
+    }
+}

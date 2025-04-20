@@ -18,6 +18,7 @@ import sla from './sla/sla.routes';
 import teams from './teams/teams.routes';
 import profile from './profile/profile.routes';
 import sorter from './sorter/sorter.route';
+import board from './board/board.route';
 
 export default {
   routes: [
@@ -51,6 +52,7 @@ export default {
     ...sla.routes,
     ...teams.routes,
     ...profile.routes,
-    ...sorter.routes
+    ...sorter.routes,
+    ...board.routes
   ],
 };
