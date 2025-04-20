@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_04_03_211636) do
+ActiveRecord::Schema[7.0].define(version: 2025_04_09_182949) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -484,6 +484,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_04_03_211636) do
     t.datetime "waiting_since"
     t.text "cached_label_list"
     t.integer "conversations_state_id"
+    t.integer "kanban_states_id"
     t.index ["account_id", "display_id"], name: "index_conversations_on_account_id_and_display_id", unique: true
     t.index ["account_id", "id"], name: "index_conversations_on_id_and_account_id"
     t.index ["account_id", "inbox_id", "status", "assignee_id"], name: "conv_acid_inbid_stat_asgnid_idx"
@@ -647,6 +648,16 @@ ActiveRecord::Schema[7.0].define(version: 2025_04_03_211636) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "settings", default: {}
+  end
+
+  create_table "kanban_states", force: :cascade do |t|
+    t.string "name"
+    t.string "color"
+    t.integer "order"
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_kanban_states_on_account_id"
   end
 
   create_table "labels", force: :cascade do |t|
@@ -1004,6 +1015,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_04_03_211636) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "kanban_states", "accounts", on_delete: :restrict
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).
