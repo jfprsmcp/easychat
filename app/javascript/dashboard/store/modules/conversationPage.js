@@ -7,15 +7,29 @@ const state = {
     unassigned: 0,
     all: 0,
     appliedFilters: 0,
+    board: {}
   },
   hasEndReached: {
     me: false,
     unassigned: false,
     all: false,
+    board: {}
   },
 };
 
 export const getters = {
+  getHasEndReachedBoard: $state => filter => {
+    if ($state.hasEndReached.board[filter] == undefined) {
+      return false
+    }
+    return $state.hasEndReached.board[filter]
+  },
+  getCurrentPageBoardFilter: $state => filter => {
+    if ($state.currentPage.board[filter] == undefined) {
+      return 0
+    }
+    return $state.currentPage.board[filter]
+  },
   getHasEndReached: $state => filter => {
     return $state.hasEndReached[filter];
   },
@@ -28,6 +42,18 @@ export const getters = {
 };
 
 export const actions = {
+  setCurrentPageBoard({ commit }, { filter, page }) {
+    commit(types.default.SET_CURRENT_PAGE_BOARD, { filter, page });
+  },
+  setEndReachedBoard({ commit }, { filter }) {
+    commit(types.default.SET_CONVERSATION_BOARD_END_REACHED, { filter });
+  },
+  clearCurrentPageBoard({ commit }){
+    commit(types.default.CLEAR_CURRENT_PAGE_BOARD);
+  },
+  clearEndReachedBoard({ commit }){
+    commit(types.default.CLEAR_CONVERSATION_BOARD_END_REACHED);
+  },
   setCurrentPage({ commit }, { filter, page }) {
     commit(types.default.SET_CURRENT_PAGE, { filter, page });
   },
@@ -40,6 +66,18 @@ export const actions = {
 };
 
 export const mutations = {
+  [types.default.SET_CURRENT_PAGE_BOARD]: ($state, { filter, page }) => {
+    Vue.set($state.currentPage.board, filter, page);
+  },
+  [types.default.SET_CONVERSATION_BOARD_END_REACHED]: ($state, { filter }) => {
+    Vue.set($state.hasEndReached.board, filter, true);
+  },
+  [types.default.CLEAR_CURRENT_PAGE_BOARD]: ($state) => {
+    Vue.set($state.currentPage.board,{});
+  },
+  [types.default.CLEAR_CONVERSATION_BOARD_END_REACHED]: ($state) => {
+    Vue.set($state.hasEndReached.board, {});
+  },
   [types.default.SET_CURRENT_PAGE]: ($state, { filter, page }) => {
     Vue.set($state.currentPage, filter, page);
   },
@@ -56,6 +94,7 @@ export const mutations = {
       unassigned: 0,
       all: 0,
       appliedFilters: 0,
+      board: {}
     };
 
     $state.hasEndReached = {
@@ -63,6 +102,7 @@ export const mutations = {
       unassigned: false,
       all: false,
       appliedFilters: false,
+      board: {}
     };
   },
 };

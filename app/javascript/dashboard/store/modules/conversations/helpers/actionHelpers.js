@@ -1,5 +1,12 @@
 import types from '../../../mutation-types';
 
+export const setPageFilterBoard = ({ dispatch, filter, page, markEndReached }) => {
+  dispatch('conversationPage/setCurrentPageBoard', { filter, page }, { root: true });
+  if (markEndReached) {
+    dispatch('conversationPage/setEndReachedBoard', { filter }, { root: true });
+  }
+};
+
 export const setPageFilter = ({ dispatch, filter, page, markEndReached }) => {
   dispatch('conversationPage/setCurrentPage', { filter, page }, { root: true });
   if (markEndReached) {
@@ -60,3 +67,22 @@ export const buildConversationList = (
     markEndReached: !conversationList.length,
   });
 };
+
+export const buildConversationListBoard = (
+  context,
+  requestPayload,
+  responseData,
+) => {
+  const { column_id } = requestPayload
+  const { payload: conversationsColumn } = responseData
+  context.commit(types.SET_CONVERSATION_BOARD, { id: column_id, data: conversationsColumn });
+  context.commit(types.CLEAR_BOARD_LIST_LOADING_STATUS, column_id);
+  setContacts(context.commit, conversationsColumn);
+  setPageFilterBoard({
+    dispatch: context.dispatch,
+    filter: column_id,
+    page: requestPayload.page,
+    markEndReached: !conversationsColumn.length,
+  });
+};
+

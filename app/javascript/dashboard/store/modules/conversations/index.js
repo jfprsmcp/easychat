@@ -10,6 +10,8 @@ import { emitter } from 'shared/helpers/mitt';
 
 const state = {
   allConversations: [],
+  boardConversations: [],
+  boardListLoading: {},
   attachments: {},
   listLoadingStatus: true,
   chatStatusFilter: wootConstants.STATUS_TYPE.OPEN,
@@ -57,6 +59,23 @@ export const mutations = {
   [types.EMPTY_ALL_CONVERSATION](_state) {
     _state.allConversations = [];
     _state.selectedChatId = null;
+  },
+  [types.SET_CONVERSATION_BOARD](_state, list) {
+    const { id, data: conversations } = list
+    let column_exist = _state.boardConversations.some((column) => column.id == id)
+    if (!column_exist) {
+      _state.boardConversations = [..._state.boardConversations, { id, data: conversations }]
+      return
+    }
+    _state.boardConversations = _state.boardConversations.map((column) => {
+      if (column.id == id) {
+        return { ...column, data: [...column.data, ...conversations] }
+      }
+      return column
+    })
+  },
+  [types.CLEAR_CONVERSATION_BOARD](_state) {
+    _state.boardConversations = []
   },
   [types.SET_ALL_MESSAGES_LOADED](_state) {
     const [chat] = getSelectedChatConversation(_state);
@@ -236,6 +255,14 @@ export const mutations = {
 
   [types.CLEAR_LIST_LOADING_STATUS](_state) {
     _state.listLoadingStatus = false;
+  },
+
+  [types.CLEAR_BOARD_LIST_LOADING_STATUS](_state, column_id) {
+    _state.boardListLoading = { ..._state.boardListLoading, [column_id]: false }
+  },
+
+  [types.SET_BOARD_LIST_LOADING_STATUS](_state, column_id) {
+    _state.boardListLoading = { ..._state.boardListLoading, [column_id]: true }
   },
 
   [types.UPDATE_MESSAGE_UNREAD_COUNT](

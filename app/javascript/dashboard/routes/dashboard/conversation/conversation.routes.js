@@ -1,6 +1,7 @@
 /* eslint arrow-body-style: 0 */
 import { frontendURL } from '../../../helper/URLHelper';
 const ConversationView = () => import('./ConversationView.vue');
+const ConversationBoard = () => import('./ConversationBoard.vue');
 
 export default {
   routes: [
@@ -190,6 +191,17 @@ export default {
         conversationId: route.params.conversationId,
         conversationType: 'participating',
       }),
+    },
+    {
+      path: frontendURL('accounts/:accountId/board'),
+      name: 'board_conversations',
+      meta: {
+        permissions: ['administrator', 'agent'],
+      },
+      component: ConversationBoard,
+      props: () => {
+        return { inboxId: 0 };
+      },
     },
   ],
 };

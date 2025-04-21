@@ -12,6 +12,9 @@ const getters = {
   getAllConversations: ({ allConversations, chatSortFilter: sortKey }) => {
     return allConversations.sort((a, b) => sortComparator(a, b, sortKey));
   },
+  getBoardConversations: ({ boardConversations }) => {
+    return boardConversations;
+  },
   getSelectedChat: ({ selectedChatId, allConversations }) => {
     const selectedChat = allConversations.find(
       conversation => conversation.id === selectedChatId
@@ -75,6 +78,7 @@ const getters = {
     });
   },
   getChatListLoadingStatus: ({ listLoadingStatus }) => listLoadingStatus,
+  getBoardListLoadingStatus: ({ boardListLoading }) => boardListLoading,
   getAllMessagesLoaded(_state) {
     const [chat] = getSelectedChatConversation(_state);
     return !chat || chat.allMessagesLoaded === undefined

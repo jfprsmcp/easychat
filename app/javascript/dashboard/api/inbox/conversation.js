@@ -16,6 +16,8 @@ class ConversationApi extends ApiClient {
     conversationType,
     sortBy,
     updatedWithin,
+    group,
+    group_id
   }) {
     return axios.get(this.url, {
       params: {
@@ -28,6 +30,8 @@ class ConversationApi extends ApiClient {
         conversation_type: conversationType,
         sort_by: sortBy,
         updated_within: updatedWithin,
+        group,
+        group_id
       },
     });
   }
@@ -127,6 +131,14 @@ class ConversationApi extends ApiClient {
   updateParticipants({ conversationId, userIds }) {
     return axios.patch(`${this.url}/${conversationId}/participants`, {
       user_ids: userIds,
+    });
+  }
+
+  update({ conversationId, attributes }) {
+    return axios.put(`${this.url}/${conversationId}?`, null, {
+      params:{
+        ...attributes
+      }
     });
   }
 

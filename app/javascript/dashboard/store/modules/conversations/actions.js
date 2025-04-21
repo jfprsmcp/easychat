@@ -9,6 +9,7 @@ import {
   isOnMentionsView,
   isOnUnattendedView,
   isOnFoldersView,
+  buildConversationListBoard,
 } from './helpers/actionHelpers';
 import messageReadActions from './actions/messageReadActions';
 import messageTranslateActions from './actions/messageTranslateActions';
@@ -56,6 +57,27 @@ const actions = {
     }
   },
 
+  fetchConversationBoard: async ({ commit, state, dispatch }, params) => {
+    commit(types.SET_BOARD_LIST_LOADING_STATUS, params.column_id);
+    try {
+      let queryParams = { ...params, column_id: undefined }
+      const { data: { data } } = await ConversationApi.get(queryParams);
+      buildConversationListBoard({ commit, dispatch }, params, data)
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
+  fetchUpdateKanbanStateConversation: async ({ commit, state, dispatch }, payload) => {
+    let { conversationId, ...attributes } = payload
+    try {
+      await ConversationApi.update({ conversationId, attributes })
+    } catch (error) {
+      throw error;
+    }
+  },
+  clearConversationBoard({ commit }) {
+    commit(types.CLEAR_CONVERSATION_BOARD);
+  },
   fetchFilteredConversations: async ({ commit, dispatch }, params) => {
     commit(types.SET_LIST_LOADING_STATUS);
     try {
