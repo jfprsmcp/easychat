@@ -197,7 +197,7 @@ export const mutations = {
     { lastActivityAt, conversationId, kanban_state }
   ) {
     try {
-      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0
+      let selectedChatColumnId = kanban_state.id ?? _state.selectedChatColumnId ?? 0;
       const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
       if (chat) {
         Vue.set(chat, 'last_activity_at', lastActivityAt);
@@ -307,7 +307,7 @@ export const mutations = {
   [types.ADD_MESSAGE_BOARD](_state, message) {
     try {
       const { conversation_id: conversationId, kanban_state } = message;
-      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0;
+      let selectedChatColumnId = kanban_state.id ?? _state.selectedChatColumnId ?? 0;
       const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
       if (!chat) return;
 
@@ -461,7 +461,7 @@ export const mutations = {
   },
   [types.SET_CONVERSATION_BOARD_CAN_REPLY](_state, { conversationId, canReply, kanban_state }) {
     try {
-      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0;
+      let selectedChatColumnId = kanban_state.id ?? _state.selectedChatColumnId ?? 0;
       const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
       if (chat) {
         Vue.set(chat, 'can_reply', canReply);
