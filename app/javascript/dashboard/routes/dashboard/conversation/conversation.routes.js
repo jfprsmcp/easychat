@@ -203,5 +203,20 @@ export default {
         return { inboxId: 0 };
       },
     },
+    {
+      path: frontendURL('accounts/:accountId/board/conversations/:conversation_id'),
+      name: 'inbox_board_conversation',
+      meta: {
+        permissions: ['administrator', 'agent'],
+      },
+      component: ConversationBoard,
+      props: route => {
+        return { 
+          inboxId: 0, 
+          conversationId: route.params.conversation_id, 
+          columnId: route.query.columnId ?? 0 
+        }
+      },
+    },
   ],
 };

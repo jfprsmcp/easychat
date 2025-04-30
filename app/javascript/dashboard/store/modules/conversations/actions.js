@@ -14,6 +14,54 @@ import {
 import messageReadActions from './actions/messageReadActions';
 import messageTranslateActions from './actions/messageTranslateActions';
 import * as Sentry from '@sentry/browser';
+import router from '../../../routes';
+
+const TYPE_LIST = {
+  SET_ALL_MESSAGES_LOADED: {
+    default: types.SET_ALL_MESSAGES_LOADED,
+    board: types.SET_ALL_MESSAGES_BOARD_LOADED
+  },
+  SET_PREVIOUS_CONVERSATIONS: {
+    default: types.SET_PREVIOUS_CONVERSATIONS,
+    board: types.SET_PREVIOUS_BOARD_CONVERSATIONS,
+  },
+  CLEAR_ALL_MESSAGES_LOADED: {
+    default: types.CLEAR_ALL_MESSAGES_LOADED,
+    board: types.CLEAR_ALL_MESSAGES_LOADED_BOARD
+  },
+  ADD_MESSAGE: {
+    default: types.ADD_MESSAGE,
+    board: types.ADD_MESSAGE_BOARD
+  },
+  ASSIGN_TEAM: {
+    default: types.ASSIGN_TEAM,
+    board: types.ASSIGN_TEAM_BOARD
+  },
+  ASSIGN_AGENT: {
+    default: types.ASSIGN_AGENT,
+    board: types.ASSIGN_AGENT_BOARD
+  },
+  ASSIGN_PRIORITY: {
+    default: types.ASSIGN_PRIORITY,
+    board: types.ASSIGN_PRIORITY_BOARD
+  },
+  SET_CONVERSATION_CAN_REPLY:{
+    default: types.SET_CONVERSATION_CAN_REPLY,
+    board: types.SET_CONVERSATION_BOARD_CAN_REPLY
+  },
+  UPDATE_CONVERSATION_LAST_ACTIVITY:{
+    default: types.UPDATE_CONVERSATION_LAST_ACTIVITY,
+    board: types.UPDATE_CONVERSATION_BOARD_LAST_ACTIVITY
+  },
+  UPDATE_CONVERSATION: {
+    default: types.UPDATE_CONVERSATION,
+    board: types.UPDATE_CONVERSATION_BOARD
+  },
+  ADD_CONVERSATION: {
+    default: types.ADD_CONVERSATION,
+    board: types.ADD_CONVERSATION_BOARD
+  },
+}
 
 export const hasMessageFailedWithExternalError = pendingMessage => {
   // This helper is used to check if the message has failed with an external error.
@@ -27,12 +75,21 @@ export const hasMessageFailedWithExternalError = pendingMessage => {
   return status === MESSAGE_STATUS.FAILED && externalError !== '';
 };
 
+export const getTypeList = (type) => {
+  let routeName = router.app._route.name;
+  let useListConversation = "default"
+  if (routeName.includes("board")) {
+    useListConversation = "board"
+  }
+  return TYPE_LIST[type][useListConversation]
+}
+
 // actions
 const actions = {
   getConversation: async ({ commit }, conversationId) => {
     try {
       const response = await ConversationApi.show(conversationId);
-      commit(types.UPDATE_CONVERSATION, response.data);
+      commit(getTypeList(types.UPDATE_CONVERSATION), response.data);
       commit(`contacts/${types.SET_CONTACT_ITEM}`, response.data.meta.sender);
     } catch (error) {
       // Ignore error
@@ -58,10 +115,10 @@ const actions = {
   },
 
   fetchConversationBoard: async ({ commit, state, dispatch }, params) => {
-    commit(types.SET_BOARD_LIST_LOADING_STATUS, params.column_id);
+    const { filters, column } = params
+    commit(types.SET_BOARD_LIST_LOADING_STATUS, column.id);
     try {
-      let queryParams = { ...params, column_id: undefined }
-      const { data: { data } } = await ConversationApi.get(queryParams);
+      const { data: { data } } = await ConversationApi.get(filters);
       buildConversationListBoard({ commit, dispatch }, params, data)
     } catch (error) {
       console.warn({ error })
@@ -110,12 +167,12 @@ const actions = {
         id: data.conversationId,
         data: meta,
       });
-      commit(types.SET_PREVIOUS_CONVERSATIONS, {
+      commit(getTypeList(types.SET_PREVIOUS_CONVERSATIONS), {
         id: data.conversationId,
         data: payload,
       });
       if (!payload.length) {
-        commit(types.SET_ALL_MESSAGES_LOADED);
+        commit(getTypeList(types.SET_ALL_MESSAGES_LOADED));
       }
     } catch (error) {
       // Handle error
@@ -210,13 +267,13 @@ const actions = {
 
   async setActiveChat({ commit, dispatch }, { data, after }) {
     commit(types.SET_CURRENT_CHAT_WINDOW, data);
-    commit(types.CLEAR_ALL_MESSAGES_LOADED);
+    commit(getTypeList(types.CLEAR_ALL_MESSAGES_LOADED))
     if (data.dataFetched === undefined) {
       try {
         await dispatch('fetchPreviousMessages', {
           after,
           before: data.messages[0].id,
-          conversationId: data.id,
+          conversationId: data.id
         });
         Vue.set(data, 'dataFetched', true);
       } catch (error) {
@@ -231,10 +288,14 @@ const actions = {
         conversationId,
         agentId,
       });
-      dispatch('setCurrentChatAssignee', response.data);
+      dispatch('setCurrentChatAssigneeAdapter', { assignee: response.data });
     } catch (error) {
       // Handle error
     }
+  },
+
+  setCurrentChatAssigneeAdapter({ commit }, { assignee }) {
+    commit(getTypeList(types.ASSIGN_AGENT), assignee);
   },
 
   setCurrentChatAssignee({ commit }, assignee) {
@@ -254,7 +315,7 @@ const actions = {
   },
 
   setCurrentChatTeam({ commit }, { team, conversationId }) {
-    commit(types.ASSIGN_TEAM, { team, conversationId });
+    commit(getTypeList(types.ASSIGN_TEAM), { team, conversationId });
   },
 
   toggleStatus: async (
@@ -292,14 +353,14 @@ const actions = {
   sendMessageWithData: async ({ commit }, pendingMessage) => {
     const { conversation_id: conversationId, id } = pendingMessage;
     try {
-      commit(types.ADD_MESSAGE, {
+      commit(getTypeList(types.ADD_MESSAGE), {
         ...pendingMessage,
         status: MESSAGE_STATUS.PROGRESS,
       });
       const response = hasMessageFailedWithExternalError(pendingMessage)
         ? await MessageApi.retry(conversationId, id)
         : await MessageApi.create(pendingMessage);
-      commit(types.ADD_MESSAGE, {
+      commit(getTypeList(types.ADD_MESSAGE), {
         ...response.data,
         status: MESSAGE_STATUS.SENT,
       });
@@ -311,7 +372,7 @@ const actions = {
       const errorMessage = error.response
         ? error.response.data.error
         : undefined;
-      commit(types.ADD_MESSAGE, {
+      commit(getTypeList(types.ADD_MESSAGE), {
         ...pendingMessage,
         meta: {
           error: errorMessage,
@@ -323,18 +384,19 @@ const actions = {
   },
 
   addMessage({ commit }, message) {
-    commit(types.ADD_MESSAGE, message);
+    commit(getTypeList(types.ADD_MESSAGE) , message);
     if (message.message_type === MESSAGE_TYPE.INCOMING) {
-      commit(types.SET_CONVERSATION_CAN_REPLY, {
+      commit(getTypeList(types.SET_CONVERSATION_CAN_REPLY), {
         conversationId: message.conversation_id,
         canReply: true,
+        kanban_state: message.kanban_state
       });
       commit(types.ADD_CONVERSATION_ATTACHMENTS, message);
     }
   },
 
   updateMessage({ commit }, message) {
-    commit(types.ADD_MESSAGE, message);
+    commit(getTypeList(types.ADD_MESSAGE) , message);
   },
 
   deleteMessage: async function deleteLabels(
@@ -343,7 +405,7 @@ const actions = {
   ) {
     try {
       const { data } = await MessageApi.delete(conversationId, messageId);
-      commit(types.ADD_MESSAGE, data);
+      commit(getTypeList(types.ADD_MESSAGE) , data);
       commit(types.DELETE_CONVERSATION_ATTACHMENTS, data);
     } catch (error) {
       throw new Error(error);
@@ -366,7 +428,7 @@ const actions = {
       !isOnUnattendedView(rootState) &&
       isMatchingInboxFilter
     ) {
-      commit(types.ADD_CONVERSATION, conversation);
+      commit(getTypeList(types.ADD_CONVERSATION), conversation);
       dispatch('contacts/setContact', sender);
     }
   },
@@ -387,7 +449,7 @@ const actions = {
     const {
       meta: { sender },
     } = conversation;
-    commit(types.UPDATE_CONVERSATION, conversation);
+    commit(getTypeList(types.UPDATE_CONVERSATION), conversation);
 
     dispatch('conversationLabels/setConversationLabel', {
       id: conversation.id,
@@ -399,11 +461,12 @@ const actions = {
 
   updateConversationLastActivity(
     { commit },
-    { conversationId, lastActivityAt }
+    { conversationId, lastActivityAt, kanban_state }
   ) {
-    commit(types.UPDATE_CONVERSATION_LAST_ACTIVITY, {
+    commit(getTypeList(types.UPDATE_CONVERSATION_LAST_ACTIVITY), {
       lastActivityAt,
       conversationId,
+      kanban_state
     });
   },
 
@@ -505,7 +568,7 @@ const actions = {
   },
 
   setCurrentChatPriority({ commit }, { priority, conversationId }) {
-    commit(types.ASSIGN_PRIORITY, { priority, conversationId });
+    commit(getTypeList(types.ASSIGN_PRIORITY), { priority, conversationId });
   },
 
   setContextMenuChatId({ commit }, chatId) {

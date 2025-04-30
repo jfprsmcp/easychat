@@ -73,15 +73,15 @@ export const buildConversationListBoard = (
   requestPayload,
   responseData,
 ) => {
-  const { column_id } = requestPayload
+  const { column, filters } = requestPayload
   const { payload: conversationsColumn } = responseData
-  context.commit(types.SET_CONVERSATION_BOARD, { id: column_id, data: conversationsColumn });
-  context.commit(types.CLEAR_BOARD_LIST_LOADING_STATUS, column_id);
+  context.commit(types.SET_CONVERSATION_BOARD, { column, data: conversationsColumn });
+  context.commit(types.CLEAR_BOARD_LIST_LOADING_STATUS, column.id);
   setContacts(context.commit, conversationsColumn);
   setPageFilterBoard({
     dispatch: context.dispatch,
-    filter: column_id,
-    page: requestPayload.page,
+    filter: column.id,
+    page: filters.page,
     markEndReached: !conversationsColumn.length,
   });
 };

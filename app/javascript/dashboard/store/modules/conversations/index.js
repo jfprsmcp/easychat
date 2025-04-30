@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import types from '../../mutation-types';
-import getters, { getSelectedChatConversation } from './getters';
+import getters, { getSelectedChatConversation, getSelectedChatConversationBoard } from './getters';
 import actions from './actions';
 import { findPendingMessageIndex } from './helpers';
 import { MESSAGE_STATUS } from 'shared/constants/messages';
@@ -18,6 +18,7 @@ const state = {
   chatSortFilter: wootConstants.SORT_BY_TYPE.LATEST,
   currentInbox: null,
   selectedChatId: null,
+  selectedChatColumnId: null,
   appliedFilters: [],
   contextMenuChatId: null,
   conversationParticipants: [],
@@ -59,40 +60,83 @@ export const mutations = {
   [types.EMPTY_ALL_CONVERSATION](_state) {
     _state.allConversations = [];
     _state.selectedChatId = null;
+    _state.selectedChatColumnId = null;
   },
   [types.SET_CONVERSATION_BOARD](_state, list) {
-    const { id, data: conversations } = list
-    let column_exist = _state.boardConversations.some((column) => column.id == id)
-    if (!column_exist) {
-      _state.boardConversations = [..._state.boardConversations, { id, data: conversations }]
-      return
-    }
-    _state.boardConversations = _state.boardConversations.map((column) => {
-      if (column.id == id) {
-        return { ...column, data: [...column.data, ...conversations] }
+    const { column, data: conversations } = list
+    try {
+      let columnFind = _state.boardConversations.find((col) => col.id == column.id)
+      if (!columnFind) {
+        _state.boardConversations = [..._state.boardConversations, { id: column.id, order: column.order, data: conversations }]
+        return
       }
-      return column
-    })
+      conversations.forEach((conversation) => {
+        let conversationIndex = columnFind.data.findIndex((c) => c.id == conversation.id)
+        if (conversationIndex < 0) {
+          columnFind.data.push(conversation)
+        } else if (conversation.id !== _state.selectedChatId) {
+          columnFind.data[conversationIndex] = conversation;
+        } else {
+          const existingConversation = columnFind.data[conversationIndex];
+          columnFind.data[conversationIndex] = {
+            ...conversation,
+            allMessagesLoaded: existingConversation.allMessagesLoaded,
+            messages: existingConversation.messages,
+            dataFetched: existingConversation.dataFetched,
+          };
+        }
+      })
+      _state.boardConversations = _state.boardConversations.map((col) => {
+        if (col.id == column.id) {
+          return { ...columnFind, data: [...columnFind.data] }
+        }
+        return col
+      })
+    } catch (error) {
+      console.warn({ error })
+    }
   },
   [types.CLEAR_CONVERSATION_BOARD](_state) {
     _state.boardConversations = []
   },
   [types.SET_ALL_MESSAGES_LOADED](_state) {
-    const [chat] = getSelectedChatConversation(_state);
-    Vue.set(chat, 'allMessagesLoaded', true);
+      const [chat] = getSelectedChatConversation(_state);
+      Vue.set(chat, 'allMessagesLoaded', true);
+  },
+
+  [types.SET_ALL_MESSAGES_BOARD_LOADED](_state) {
+    try {
+      const chat = getSelectedChatConversationBoard(_state);
+      Vue.set(chat, 'allMessagesLoaded', true);
+    } catch (error) {
+      console.warn({ error })
+    }
   },
 
   [types.CLEAR_ALL_MESSAGES_LOADED](_state) {
     const [chat] = getSelectedChatConversation(_state);
     Vue.set(chat, 'allMessagesLoaded', false);
   },
+
+  [types.CLEAR_ALL_MESSAGES_LOADED_BOARD](_state) {
+    const chat = getSelectedChatConversationBoard(_state);
+    Vue.set(chat, 'allMessagesLoaded', false);
+  },
+
   [types.CLEAR_CURRENT_CHAT_WINDOW](_state) {
     _state.selectedChatId = null;
+    _state.selectedChatColumnId = null;
   },
 
   [types.SET_PREVIOUS_CONVERSATIONS](_state, { id, data }) {
     if (data.length) {
       const [chat] = _state.allConversations.filter(c => c.id === id);
+      chat.messages.unshift(...data);
+    }
+  },
+  [types.SET_PREVIOUS_BOARD_CONVERSATIONS](_state, { id, data }) {
+    if (data.length) {
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatId: id })
       chat.messages.unshift(...data);
     }
   },
@@ -111,6 +155,7 @@ export const mutations = {
   [types.SET_CURRENT_CHAT_WINDOW](_state, activeChat) {
     if (activeChat) {
       _state.selectedChatId = activeChat.id;
+      _state.selectedChatColumnId = activeChat.kanban_state.id || 0;
     }
   },
 
@@ -119,9 +164,23 @@ export const mutations = {
     Vue.set(chat.meta, 'assignee', assignee);
   },
 
+  [types.ASSIGN_AGENT_BOARD](_state, assignee) {
+    const chat = getSelectedChatConversationBoard(_state);
+    Vue.set(chat.meta, 'assignee', assignee);
+  },
+
   [types.ASSIGN_TEAM](_state, { team, conversationId }) {
     const [chat] = _state.allConversations.filter(c => c.id === conversationId);
     Vue.set(chat.meta, 'team', team);
+  },
+
+  [types.ASSIGN_TEAM_BOARD](_state, { team, conversationId }) {
+    try {
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatId: conversationId })
+      Vue.set(chat.meta, 'team', team);
+    } catch (error) {
+      console.warn({ error })
+    }
   },
 
   [types.UPDATE_CONVERSATION_LAST_ACTIVITY](
@@ -133,11 +192,32 @@ export const mutations = {
       Vue.set(chat, 'last_activity_at', lastActivityAt);
     }
   },
+  [types.UPDATE_CONVERSATION_BOARD_LAST_ACTIVITY](
+    _state,
+    { lastActivityAt, conversationId, kanban_state }
+  ) {
+    try {
+      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
+      if (chat) {
+        Vue.set(chat, 'last_activity_at', lastActivityAt);
+      }
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
   [types.ASSIGN_PRIORITY](_state, { priority, conversationId }) {
     const [chat] = _state.allConversations.filter(c => c.id === conversationId);
     Vue.set(chat, 'priority', priority);
   },
-
+  [types.ASSIGN_PRIORITY_BOARD](_state, { priority, conversationId }) {
+    try {
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatId: conversationId })
+      Vue.set(chat, 'priority', priority);
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
   [types.UPDATE_CONVERSATION_CUSTOM_ATTRIBUTES](_state, custom_attributes) {
     const [chat] = getSelectedChatConversation(_state);
     Vue.set(chat, 'custom_attributes', custom_attributes);
@@ -224,8 +304,51 @@ export const mutations = {
     }
   },
 
+  [types.ADD_MESSAGE_BOARD](_state, message) {
+    try {
+      const { conversation_id: conversationId, kanban_state } = message;
+      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0;
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
+      if (!chat) return;
+
+      const pendingMessageIndex = findPendingMessageIndex(chat, message);
+      if (pendingMessageIndex !== -1) {
+        Vue.set(chat.messages, pendingMessageIndex, message);
+      } else {
+        chat.conversations_state_name = message.conversations_state_name;
+        chat.conversations_state = message.conversations_state;
+        chat.messages.push(message);
+        chat.timestamp = message.created_at;
+        const { conversation: { unread_count: unreadCount = 0 } = {} } = message;
+        chat.unread_count = unreadCount;
+        if (_state.selectedChatId === conversationId) {
+          emitter.emit(BUS_EVENTS.FETCH_LABEL_SUGGESTIONS);
+          emitter.emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
+        }
+      }
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
+
   [types.ADD_CONVERSATION](_state, conversation) {
     _state.allConversations.push(conversation);
+  },
+
+  [types.ADD_CONVERSATION_BOARD](_state, conversation) {
+    try {
+      if (_state.boardConversations.length == 0) {
+        return
+      }
+      _state.boardConversations = _state.boardConversations.map((column) => {
+        if (column.order == 0) {
+          return { ...column, data: [conversation, ...column.data] }
+        }
+        return column
+      })
+    } catch (error) {
+      console.warn({ error })
+    }
   },
 
   [types.UPDATE_CONVERSATION](_state, conversation) {
@@ -249,6 +372,36 @@ export const mutations = {
     }
   },
 
+  [types.UPDATE_CONVERSATION_BOARD](_state, conversation) {
+    try {
+      const { boardConversations } = _state;
+      let columnId = conversation.kanban_state.id
+      const matchFunction = (columnId == null)
+        ? (column) => column.order == 0
+        : (column) => column.id == columnId;
+      const columnIndex = boardConversations.findIndex(matchFunction)
+      if (columnIndex < 0) {
+        return
+      }
+      const conversationIndex = boardConversations[columnIndex].data.findIndex(c => c.id === conversation.id)
+      if (conversationIndex > -1) {
+        const { messages, ...conversationAttributes } = conversation;
+        const currentConversation = {
+          ...boardConversations[columnIndex].data[conversationIndex],
+          ...conversationAttributes,
+        };
+        Vue.set(boardConversations[columnIndex].data, conversationIndex, currentConversation);
+        if (_state.selectedChatId === conversation.id) {
+          emitter.emit(BUS_EVENTS.FETCH_LABEL_SUGGESTIONS);
+          emitter.emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
+        }
+      } else {
+        boardConversations[columnIndex].data.push(conversation)
+      }
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
   [types.SET_LIST_LOADING_STATUS](_state) {
     _state.listLoadingStatus = true;
   },
@@ -304,6 +457,17 @@ export const mutations = {
     const [chat] = _state.allConversations.filter(c => c.id === conversationId);
     if (chat) {
       Vue.set(chat, 'can_reply', canReply);
+    }
+  },
+  [types.SET_CONVERSATION_BOARD_CAN_REPLY](_state, { conversationId, canReply, kanban_state }) {
+    try {
+      let selectedChatColumnId = _state.selectedChatColumnId ?? kanban_state.id ?? 0;
+      const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
+      if (chat) {
+        Vue.set(chat, 'can_reply', canReply);
+      }
+    } catch (error) {
+      console.warn({ error })
     }
   },
 

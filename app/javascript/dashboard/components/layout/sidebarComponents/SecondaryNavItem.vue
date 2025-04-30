@@ -76,6 +76,12 @@ export default {
 
       return isFeatureEnabled;
     },
+    isBoard(){
+      return (
+        this.$store.state.route.name === 'inbox_board_conversation' &&
+        this.menuItem.toStateName === 'board_conversations'
+      );
+    },
     isAllConversations() {
       return (
         this.$store.state.route.name === 'inbox_conversation' &&
@@ -126,6 +132,7 @@ export default {
       // If active inbox is present, do not highlight conversations
       if (this.activeInbox) return ' ';
       if (
+        this.isBoard ||
         this.isAllConversations ||
         this.isMentions ||
         this.isUnattended ||

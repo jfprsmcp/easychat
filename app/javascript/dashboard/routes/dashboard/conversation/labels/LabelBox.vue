@@ -14,7 +14,13 @@ export default {
     LabelDropdown,
     AddLabel,
   },
-  setup() {
+  props: {
+    list: {
+      type: String,
+      default: undefined
+    }
+  },
+  setup(props) {
     const { isAdmin } = useAdmin();
 
     const {
@@ -23,7 +29,7 @@ export default {
       accountLabels,
       addLabelToConversation,
       removeLabelFromConversation,
-    } = useConversationLabels();
+    } = useConversationLabels({ list: props.list });
 
     const conversationLabelBoxRef = ref(null);
     const showSearchDropdownLabel = ref(false);

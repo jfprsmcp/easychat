@@ -1,20 +1,25 @@
 <script>
-import ChatListHeader from './ChatListHeader.vue';
+import BoardHeader from './BoardHeader.vue';
 import { mapGetters } from 'vuex';
 import BoardColumn from './BoardColumn.vue';
 export default {
     props: {
-        conversationType: {
-            type: String,
-            default: '',
+        minWidth: {
+            type: Number,
+            default: 300
+        },
+        expandedFull: {
+            type: Boolean,
+            default: true
         },
     },
     components: {
-        ChatListHeader,
+        BoardHeader,
         BoardColumn
     },
     computed: {
         ...mapGetters({
+            columnList: 'getBoardConversations',
             kanbanStateList: 'kanbanState/getKanbanState',
             uiFlags: 'kanbanState/getUIFlags',
         }),
@@ -23,177 +28,24 @@ export default {
         },
         activeStatus() {
             return "open"
+        },
+        contentStyles(){
+            return {
+                width: this.expandedFull  ? "100%" : `${this.minWidth}px`
+            }
+        },
+        loadConversationAllColumn() {
+            if (this.kanbanStateList.length == 0)
+                return false
+            return this.kanbanStateList.length == this.columnList.length;
         }
     },
-    methods: {
-        selectConversation(conversationId, inboxId) {
-            this.$store.dispatch(
-                'bulkActions/setSelectedConversationIds',
-                conversationId
-            );
-            this.selectedInboxes.push(inboxId);
-        },
-        deSelectConversation(conversationId, inboxId) {
-            this.$store.dispatch(
-                'bulkActions/removeSelectedConversationIds',
-                conversationId
-            );
-            this.selectedInboxes = this.selectedInboxes.filter(
-                item => item !== inboxId
-            );
-        },
-        async onAssignAgent(agent, conversationId = null) {
-            try {
-                await this.$store.dispatch('bulkActions/process', {
-                    type: 'Conversation',
-                    ids: conversationId || this.selectedConversations,
-                    fields: {
-                        assignee_id: agent.id,
-                    },
-                });
-                this.$store.dispatch('bulkActions/clearSelectedConversationIds');
-                if (conversationId) {
-                    useAlert(
-                        this.$t(
-                            'CONVERSATION.CARD_CONTEXT_MENU.API.AGENT_ASSIGNMENT.SUCCESFUL',
-                            {
-                                agentName: agent.name,
-                                conversationId,
-                            }
-                        )
-                    );
-                } else {
-                    useAlert(this.$t('BULK_ACTION.ASSIGN_SUCCESFUL'));
-                }
-            } catch (err) {
-                useAlert(this.$t('BULK_ACTION.ASSIGN_FAILED'));
+    watch: {
+        loadConversationAllColumn(value){
+            if(value){
+                this.$emit('conversationLoad');
             }
-        },
-        async onAssignTeam(team, conversationId = null) {
-            try {
-                await this.$store.dispatch('assignTeam', {
-                    conversationId,
-                    teamId: team.id,
-                });
-                useAlert(
-                    this.$t(
-                        'CONVERSATION.CARD_CONTEXT_MENU.API.TEAM_ASSIGNMENT.SUCCESFUL',
-                        {
-                            team: team.name,
-                            conversationId,
-                        }
-                    )
-                );
-            } catch (error) {
-                useAlert(
-                    this.$t('CONVERSATION.CARD_CONTEXT_MENU.API.TEAM_ASSIGNMENT.FAILED')
-                );
-            }
-        },
-        async onAssignLabels(labels, conversationId = null) {
-            try {
-                await this.$store.dispatch('bulkActions/process', {
-                    type: 'Conversation',
-                    ids: conversationId || this.selectedConversations,
-                    labels: {
-                        add: labels,
-                    },
-                });
-                this.$store.dispatch('bulkActions/clearSelectedConversationIds');
-                if (conversationId) {
-                    useAlert(
-                        this.$t(
-                            'CONVERSATION.CARD_CONTEXT_MENU.API.LABEL_ASSIGNMENT.SUCCESFUL',
-                            {
-                                labelName: labels[0],
-                                conversationId,
-                            }
-                        )
-                    );
-                } else {
-                    useAlert(this.$t('BULK_ACTION.LABELS.ASSIGN_SUCCESFUL'));
-                }
-            } catch (err) {
-                useAlert(this.$t('BULK_ACTION.LABELS.ASSIGN_FAILED'));
-            }
-        },
-        toggleConversationStatus(conversationId, status, snoozedUntil) {
-            this.$store
-                .dispatch('toggleStatus', {
-                    conversationId,
-                    status,
-                    snoozedUntil,
-                })
-                .then(() => {
-                    useAlert(this.$t('CONVERSATION.CHANGE_STATUS'));
-                    this.isLoading = false;
-                });
-        },
-        onContextMenuToggle(state) {
-            this.isContextMenuOpen = state;
-        },
-        async markAsUnread(conversationId) {
-            try {
-                await this.$store.dispatch('markMessagesUnread', {
-                    id: conversationId,
-                });
-                const {
-                    params: { accountId, inbox_id: inboxId, label, teamId },
-                    name,
-                } = this.$route;
-                let conversationType = '';
-                if (isOnMentionsView({ route: { name } })) {
-                    conversationType = 'mention';
-                } else if (isOnUnattendedView({ route: { name } })) {
-                    conversationType = 'unattended';
-                }
-                this.$router.push(
-                    conversationListPageURL({
-                        accountId,
-                        conversationType: conversationType,
-                        customViewId: this.foldersId,
-                        inboxId,
-                        label,
-                        teamId,
-                    })
-                );
-            } catch (error) {
-                // Ignore error
-            }
-        },
-        async assignPriority(priority, conversationId = null) {
-            this.$store.dispatch('setCurrentChatPriority', {
-                priority,
-                conversationId,
-            });
-            this.$store
-                .dispatch('assignPriority', { conversationId, priority })
-                .then(() => {
-                    this.$track(CONVERSATION_EVENTS.CHANGE_PRIORITY, {
-                        newValue: priority,
-                        from: 'Context menu',
-                    });
-                    useAlert(
-                        this.$t('CONVERSATION.PRIORITY.CHANGE_PRIORITY.SUCCESSFUL', {
-                            priority,
-                            conversationId,
-                        })
-                    );
-                });
-        },
-    },
-    provide() {
-        return {
-            selectConversation: this.selectConversation,
-            deSelectConversation: this.deSelectConversation,
-            assignAgent: this.onAssignAgent,
-            assignTeam: this.onAssignTeam,
-            assignLabels: this.onAssignLabels,
-            updateConversationStatus: this.toggleConversationStatus,
-            toggleContextMenu: this.onContextMenuToggle,
-            markAsUnread: this.markAsUnread,
-            assignPriority: this.assignPriority,
-        };
+        }
     },
     mounted() {
         this.$store.dispatch('conversationPage/clearCurrentPageBoard')
@@ -204,15 +56,18 @@ export default {
 }
 </script>
 <template>
-    <div
-        class="flex flex-col flex-shrink-0 border-r w-full conversations-list-wrap rtl:border-r-0 rtl:border-l border-slate-50 dark:border-slate-800/50">
+    <div 
+        class="flex flex-col flex-shrink-0 border-r conversations-list-wrap rtl:border-r-0 rtl:border-l border-slate-50 dark:border-slate-800/50"
+        :style="contentStyles"
+    >
         <slot />
-        <ChatListHeader :page-title="pageTitle" :has-applied-filters="false" :has-active-folders="false"
-            :active-status="activeStatus" />
+        <BoardHeader 
+            :page-title="pageTitle" 
+        />
         <div class="flex gap-5 p-5 content-card">
             <div v-for="(card) in kanbanStateList" :key="card.id" class="card">
                 <h3 class="card-title">{{ card.name }}</h3>
-                <BoardColumn group="kanban" :group-id="card.id" :order="card.order" />
+                <BoardColumn @conversationLoad="" :column="card"  group="kanban" />
             </div>
         </div>
     </div>

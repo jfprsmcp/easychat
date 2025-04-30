@@ -4,10 +4,9 @@ import { getLastMessage } from 'dashboard/helper/conversationHelper';
 import Thumbnail from '../Thumbnail.vue';
 import MessagePreview from './MessagePreview.vue';
 import router from '../../../routes';
-import { frontendURL, conversationUrl } from '../../../helper/URLHelper';
+import { frontendURL } from '../../../helper/URLHelper';
 import InboxName from '../InboxName.vue';
 import inboxMixin from 'shared/mixins/inboxMixin';
-import ConversationContextMenu from './contextMenu/Index.vue';
 import TimeAgo from 'dashboard/components/ui/TimeAgo.vue';
 import CardLabels from './conversationCardComponents/CardLabels.vue';
 import PriorityMark from './PriorityMark.vue';
@@ -18,7 +17,6 @@ export default {
     CardLabels,
     InboxName,
     Thumbnail,
-    ConversationContextMenu,
     TimeAgo,
     MessagePreview,
     PriorityMark,
@@ -26,43 +24,15 @@ export default {
   },
   mixins: [inboxMixin],
   props: {
-    activeLabel: {
-      type: String,
-      default: '',
-    },
     chat: {
       type: Object,
       default: () => {},
-    },
-    hideInboxName: {
-      type: Boolean,
-      default: false,
-    },
-    hideThumbnail: {
-      type: Boolean,
-      default: false,
-    },
-    teamId: {
-      type: [String, Number],
-      default: 0,
-    },
-    foldersId: {
-      type: [String, Number],
-      default: 0,
     },
     showAssignee: {
       type: Boolean,
       default: false,
     },
-    conversationType: {
-      type: String,
-      default: '',
-    },
     selected: {
-      type: Boolean,
-      default: false,
-    },
-    enableContextMenu: {
       type: Boolean,
       default: false,
     },
@@ -70,23 +40,14 @@ export default {
   data() {
     return {
       hovered: false,
-      showContextMenu: false,
-      contextMenu: {
-        x: null,
-        y: null,
-      },
     };
   },
   computed: {
     ...mapGetters({
-      currentChat: 'getSelectedChat',
-      inboxesList: 'inboxes/getInboxes',
+      currentChatId: 'getSelectChatId',
       activeInbox: 'getSelectedInbox',
       accountId: 'getCurrentAccountId',
     }),
-    // bulkActionCheck() {
-    //   return !this.hideThumbnail && !this.hovered && !this.selected;
-    // },
     chatMetadata() {
       return this.chat.meta || {};
     },
@@ -102,7 +63,7 @@ export default {
     },
 
     isActiveChat() {
-      return this.currentChat.id === this.chat.id;
+      return this.currentChatId === this.chat.id;
     },
 
     unreadCount() {
@@ -112,11 +73,6 @@ export default {
     hasUnread() {
       return this.unreadCount > 0;
     },
-
-    isInboxNameVisible() {
-      return !this.activeInbox;
-    },
-
     lastMessageInChat() {
       return getLastMessage(this.chat);
     },
@@ -141,84 +97,28 @@ export default {
     hasSlaPolicyId() {
       return this.chat?.sla_policy_id;
     },
+    getUrl() {
+      return `accounts/${this.accountId}/board/conversations/${this.chat.id}`;
+    },
   },
   methods: {
     onCardClick(e) {
-      const { activeInbox, chat } = this;
-      const path = frontendURL(
-        conversationUrl({
-          accountId: this.accountId,
-          activeInbox,
-          id: chat.id,
-          label: this.activeLabel,
-          teamId: this.teamId,
-          foldersId: this.foldersId,
-          conversationType: this.conversationType,
-        })
-      );
-
-      if (e.metaKey || e.ctrlKey) {
-        window.open(
-          window.chatwootConfig.hostURL + path,
-          '_blank',
-          'noopener noreferrer nofollow'
-        );
+      const { activeInbox, chat, isActiveChat } = this;
+      if (isActiveChat) {
         return;
       }
-      if (this.isActiveChat) {
-        return;
+      let params = {}
+      if (chat.kanban_state.id) {
+        params['columnId'] = chat.kanban_state.id
       }
-
+      const path = frontendURL(this.getUrl, params);
       router.push({ path });
     },
     onCardHover() {
-      this.hovered = !this.hideThumbnail;
+      this.hovered = true;
     },
     onCardLeave() {
       this.hovered = false;
-    },
-    openContextMenu(e) {
-      if (!this.enableContextMenu) return;
-      e.preventDefault();
-      this.$emit('contextMenuToggle', true);
-      this.contextMenu.x = e.pageX || e.clientX;
-      this.contextMenu.y = e.pageY || e.clientY;
-      this.showContextMenu = true;
-    },
-    closeContextMenu() {
-      this.$emit('contextMenuToggle', false);
-      this.showContextMenu = false;
-      this.contextMenu.x = null;
-      this.contextMenu.y = null;
-    },
-    onUpdateConversation(status, snoozedUntil) {
-      this.closeContextMenu();
-      this.$emit(
-        'updateConversationStatus',
-        this.chat.id,
-        status,
-        snoozedUntil
-      );
-    },
-    async onAssignAgent(agent) {
-      this.$emit('assignAgent', agent, [this.chat.id]);
-      this.closeContextMenu();
-    },
-    async onAssignLabel(label) {
-      this.$emit('assignLabel', [label.title], [this.chat.id]);
-      this.closeContextMenu();
-    },
-    async onAssignTeam(team) {
-      this.$emit('assignTeam', team, this.chat.id);
-      this.closeContextMenu();
-    },
-    async markAsUnread() {
-      this.$emit('markAsUnread', this.chat.id);
-      this.closeContextMenu();
-    },
-    async assignPriority(priority) {
-      this.$emit('assignPriority', priority, this.chat.id);
-      this.closeContextMenu();
     },
   },
 };
@@ -226,51 +126,50 @@ export default {
 
 <template>
   <div
-    class="relative flex items-start flex-grow-0 flex-shrink-0 w-auto max-w-full px-4 py-0 border-t-0 border-b-0 border-l-2 border-r-0 border-transparent border-solid cursor-pointer conversation hover:bg-slate-25 dark:hover:bg-slate-800 group"
+    class="relative flex items-start flex-grow-0 flex-shrink-0 w-auto max-w-full px-4 py-0 border-t-0 border-b-0 border-l-2 border-r-0 border-transparent border-solid cursor-pointer conversation hover:bg-slate-25 dark:hover:bg-slate-800 group has-inbox-name"
     :class="{
       'active animate-card-select bg-slate-25 dark:bg-slate-800 border-woot-500':
         isActiveChat,
       'unread-chat': hasUnread,
       'has-inbox-name': showInboxName,
       'conversation-selected': selected,
-    }"
-    @mouseenter="onCardHover"
-    @mouseleave="onCardLeave"
+    }" 
+    @mouseenter="onCardHover" 
+    @mouseleave="onCardLeave" 
     @click="onCardClick"
-    @contextmenu="openContextMenu($event)"
-  >
-    <Thumbnail
-      :src="currentContact.thumbnail"
-      :badge="inboxBadge"
+    >
+    <Thumbnail 
+      :src="currentContact.thumbnail" 
+      :badge="inboxBadge" 
       :username="currentContact.name"
-      :status="currentContact.availability_status"
-      size="40px"
-    />
+      :status="currentContact.availability_status" 
+      size="40px" 
+      />
     <div
       class="px-0 py-3 border-b group-hover:border-transparent flex-1 border-slate-50 dark:border-slate-800/75 w-[calc(100%-40px)]"
-    >
+      >
       <div class="flex justify-between">
         <InboxName v-if="showInboxName" :show_state="true" :inbox="inbox" :conversation_state="chat.conversations_state" />
         <div class="flex gap-2 ml-2 rtl:mr-2 rtl:ml-0">
-          <span
+          <span 
             v-if="showAssignee && assignee.name"
             class="text-slate-500 dark:text-slate-400 text-xs font-medium leading-3 py-0.5 px-0 inline-flex text-ellipsis overflow-hidden whitespace-nowrap"
-          >
+            >
             <fluent-icon
-              icon="person"
-              size="12"
-              class="text-slate-500 dark:text-slate-400"
-            />
+              icon="person" 
+              size="12" 
+              class="text-slate-500 dark:text-slate-400" 
+              />
             {{ assignee.name }}
           </span>
           <template v-if="chat.conversations_state_name!=null && !showInboxName">
             <span :style="{ backgroundColor: chat.conversations_state.color}" class="text-xs inline-flex items-center rounded-md px-2 py-1 text-slate-900 dark:text-slate-100 font-medium">
-                {{ chat.conversations_state_name }}
+              {{ chat.conversations_state_name }}
             </span>
           </template>
           <template v-else-if="chat.conversations_state_name==null && !showInboxName">
-            <span class="text-xs  text-slate-900 dark:text-slate-100 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-gray-500/10 ring-inset">
-                no categorizada
+            <span class="text-xs inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-gray-500/10 ring-inset">
+              no categorizada
             </span>
           </template>
           <PriorityMark :priority="chat.priority" />
@@ -278,70 +177,50 @@ export default {
       </div>
       <h4
         class="conversation--user text-sm my-0 mx-2 capitalize pt-0.5 text-ellipsis font-medium overflow-hidden whitespace-nowrap w-[calc(100%-70px)] text-slate-900 dark:text-slate-100"
-      >
+        >
         {{ currentContact.name }}
       </h4>
-      <MessagePreview
-        v-if="lastMessageInChat"
+      <MessagePreview 
+        v-if="lastMessageInChat" 
         :message="lastMessageInChat"
-        class="conversation--message my-0 mx-2 leading-6 h-6 max-w-[96%] w-[16.875rem] text-sm text-slate-700 dark:text-slate-200"
-      />
-      <p
-        v-else
-        class="conversation--message text-slate-700 dark:text-slate-200 text-sm my-0 mx-2 leading-6 h-6 max-w-[96%] w-[16.875rem] overflow-hidden text-ellipsis whitespace-nowrap"
-      >
-        <fluent-icon
-          size="16"
-          class="-mt-0.5 align-middle inline-block text-slate-600 dark:text-slate-300"
-          icon="info"
+        class="conversation--message my-0 mx-2 leading-6 h-6 max-w-[96%] w-[16.875rem] text-sm text-slate-700 dark:text-slate-200" 
         />
+      <p 
+      v-else
+        class="conversation--message text-slate-700 dark:text-slate-200 text-sm my-0 mx-2 leading-6 h-6 max-w-[96%] w-[16.875rem] overflow-hidden text-ellipsis whitespace-nowrap"
+        >
+        <fluent-icon 
+          size="16" 
+          class="-mt-0.5 align-middle inline-block text-slate-600 dark:text-slate-300"
+          icon="info" 
+          />
         <span>
           {{ $t(`CHAT_LIST.NO_MESSAGES`) }}
         </span>
       </p>
       <div class="absolute flex flex-col conversation--meta right-4 top-4">
         <span class="ml-auto font-normal leading-4 text-black-600 text-xxs">
-          <TimeAgo
+          <TimeAgo 
             :last-activity-timestamp="chat.timestamp"
             :created-at-timestamp="chat.created_at"
-          />
+            />
         </span>
         <span
           class="unread shadow-lg rounded-full hidden text-xxs font-semibold h-4 leading-4 ml-auto mt-1 min-w-[1rem] px-1 py-0 text-center text-white bg-green-400"
-        >
+          >
           {{ unreadCount > 9 ? '9+' : unreadCount }}
         </span>
       </div>
-      <CardLabels
+      <CardLabels 
         :conversation-id="chat.id"
-        :conversation-labels="chat.labels"
+        :conversation-labels="chat.labels" 
         class="mt-0.5 mx-2 mb-0"
-      >
+        >
         <template v-if="hasSlaPolicyId" #before>
           <SLACardLabel :chat="chat" class="ltr:mr-1 rtl:ml-1" />
         </template>
       </CardLabels>
     </div>
-    <woot-context-menu
-      v-if="showContextMenu"
-      :x="contextMenu.x"
-      :y="contextMenu.y"
-      @close="closeContextMenu"
-    >
-      <ConversationContextMenu
-        :status="chat.status"
-        :inbox-id="inbox.id"
-        :priority="chat.priority"
-        :chat-id="chat.id"
-        :has-unread-messages="hasUnread"
-        @updateConversation="onUpdateConversation"
-        @assignAgent="onAssignAgent"
-        @assignLabel="onAssignLabel"
-        @assignTeam="onAssignTeam"
-        @markAsUnread="markAsUnread"
-        @assignPriority="assignPriority"
-      />
-    </woot-context-menu>
   </div>
 </template>
 

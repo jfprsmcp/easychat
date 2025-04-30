@@ -99,6 +99,7 @@ class ActionCableConnector extends BaseActionCableConnector {
     this.app.$store.dispatch('updateConversationLastActivity', {
       lastActivityAt,
       conversationId,
+      kanban_state: data.kanban_state
     });
   };
 

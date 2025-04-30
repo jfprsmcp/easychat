@@ -8,12 +8,43 @@ export const getSelectedChatConversation = ({
 }) =>
   allConversations.filter(conversation => conversation.id === selectedChatId);
 
+export const getSelectedChatConversationBoard = ({
+  boardConversations,
+  selectedChatId,
+  selectedChatColumnId
+}) => {
+  let selectedChat
+  if (selectedChatColumnId == 0) {
+    for (const column of boardConversations) {
+      if (column.order == 0) {
+        selectedChat = column.data.find((conversation) => conversation.id == selectedChatId)
+        break
+      }
+    }
+    return selectedChat
+  }
+  for (const column of boardConversations) {
+    if (column.id == selectedChatColumnId) {
+      selectedChat = column.data.find((conversation) => conversation.id == selectedChatId)
+      break
+    }
+  }
+  return selectedChat 
+}
+
 const getters = {
   getAllConversations: ({ allConversations, chatSortFilter: sortKey }) => {
     return allConversations.sort((a, b) => sortComparator(a, b, sortKey));
   },
   getBoardConversations: ({ boardConversations }) => {
     return boardConversations;
+  },
+  getSelectChatId: ({ selectedChatId, allConversations }) => {
+    return selectedChatId
+  },
+  getSelectedChatBoard: (state) => {
+    let selectedChat = getSelectedChatConversationBoard(state)
+    return selectedChat || {};
   },
   getSelectedChat: ({ selectedChatId, allConversations }) => {
     const selectedChat = allConversations.find(
@@ -79,6 +110,12 @@ const getters = {
   },
   getChatListLoadingStatus: ({ listLoadingStatus }) => listLoadingStatus,
   getBoardListLoadingStatus: ({ boardListLoading }) => boardListLoading,
+  getAllMessagesLoadedConversationBoard(_state) {
+    const chat = getSelectedChatConversationBoard(_state);
+    return !chat || chat.allMessagesLoaded === undefined
+      ? false
+      : chat.allMessagesLoaded;
+  },
   getAllMessagesLoaded(_state) {
     const [chat] = getSelectedChatConversation(_state);
     return !chat || chat.allMessagesLoaded === undefined

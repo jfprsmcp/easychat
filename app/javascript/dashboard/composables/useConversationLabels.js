@@ -5,7 +5,7 @@ import { useStore, useStoreGetters } from 'dashboard/composables/store';
  * Composable for managing conversation labels
  * @returns {Object} An object containing methods and computed properties for conversation labels
  */
-export function useConversationLabels() {
+export function useConversationLabels(props = {}) {
   const store = useStore();
   const getters = useStoreGetters();
 
@@ -13,7 +13,14 @@ export function useConversationLabels() {
    * The currently selected chat
    * @type {import('vue').ComputedRef<Object>}
    */
-  const currentChat = computed(() => getters.getSelectedChat.value);
+  const currentChat = computed(() => {
+    switch (props.list) {
+      case "board":
+        return getters.getSelectedChatBoard.value
+      default:
+        return getters.getSelectedChat.value
+    }
+  });
 
   /**
    * The ID of the current conversation

@@ -6,16 +6,12 @@ import ColumnItem from './ColumnItem.vue';
 import IntersectionObserver from './IntersectionObserver.vue';
 export default {
   props: {
+    column:{
+      type: Object,
+      required: true
+    },
     group: {
       type: String,
-      required: true
-    },
-    groupId: {
-      type: Number,
-      required: true
-    },
-    order: {
-      type: Number,
       required: true
     },
   },
@@ -26,12 +22,12 @@ export default {
   },
   data() {
     return {
-      activeAssigneeTab: wootConstants.ASSIGNEE_TYPE.ALL,
       infiniteLoaderOptions: null,
       infiniteLoaderOptions: {
         root: this.$refs.conversationListRef,
         rootMargin: '100px 0px 100px 0px',
       },
+      sortByMessage: "last_activity_at_desc"
     }
   },
   computed: {
@@ -40,26 +36,29 @@ export default {
       boardListLoading: 'getBoardListLoadingStatus',
     }),
     currentFiltersPage() {
-      return this.$store.getters['conversationPage/getCurrentPageBoardFilter'](this.groupId);
+      return this.$store.getters['conversationPage/getCurrentPageBoardFilter'](this.column.id);
     },
     hasCurrentPageEndReachedColumn() {
-      return this.$store.getters['conversationPage/getHasEndReachedBoard'](this.groupId);
+      return this.$store.getters['conversationPage/getHasEndReachedBoard'](this.column.id);
     },
     loading() {
-      let test = this.boardListLoading[`${this.groupId}`] ?? true
-      return test
+      return this.boardListLoading[`${this.column.id}`] ?? true
     },
     columnDefault() {
-      return this.order == 0;
+      return this.column.order == 0;
     },
     conversationLists() {
-      let itemsColumn = this.listBoard.find((column) => column.id == this.groupId)
-      return (itemsColumn == undefined ? { id: this.groupId, data: [] } : itemsColumn)
+      let itemsColumn = this.listBoard.find((column) => column.id == this.column.id)
+      return (itemsColumn == undefined ? { id: this.column.id, data: [] } : itemsColumn)
     },
     conversationFilters() {
-      let filters = { group: this.group, column_id: this.groupId, page: (this.currentFiltersPage + 1) }
+      let filters = {
+        group: this.group,
+        page: (this.currentFiltersPage + 1),
+        sortBy: this.sortByMessage
+      }
       if (!this.columnDefault) {
-        filters["group_id"] = this.groupId
+        filters["group_id"] = this.column.id
       }
       return filters;
     },
@@ -79,7 +78,7 @@ export default {
       try {
         let params = {
           conversationId: item.id,
-          kanban_states_id: (this.columnDefault) ? 'null' : this.groupId
+          kanban_states_id: (this.columnDefault) ? 'null' : this.column.id
         }
         this.$store.dispatch('fetchUpdateKanbanStateConversation', params)
       } catch (error) {
@@ -91,11 +90,11 @@ export default {
       if (this.hasCurrentPageEndReachedColumn || this.loading) {
         return;
       }
-      this.$store.dispatch('fetchConversationBoard', this.conversationFilters)
+      this.$store.dispatch('fetchConversationBoard', { filters: this.conversationFilters, column: this.column })
     },
   },
   mounted() {
-    this.$store.dispatch('fetchConversationBoard', this.conversationFilters)
+    this.$store.dispatch('fetchConversationBoard', { filters: this.conversationFilters, column: this.column })
   }
 }
 </script>
