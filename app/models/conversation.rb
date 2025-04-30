@@ -98,6 +98,7 @@ class Conversation < ApplicationRecord
   belongs_to :team, optional: true
   belongs_to :campaign, optional: true
   belongs_to :conversation_state, optional: true, foreign_key: "conversations_state_id"
+  belongs_to :kanban_state, optional: true, foreign_key: "kanban_states_id"
 
   has_many :mentions, dependent: :destroy_async
   has_many :messages, dependent: :destroy_async, autosave: true

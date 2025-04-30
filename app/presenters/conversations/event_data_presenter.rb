@@ -6,6 +6,7 @@ class Conversations::EventDataPresenter < SimpleDelegator
       channel: inbox.try(:channel_type),
       contact_inbox: contact_inbox,
       id: display_id,
+      kanban_state: build_kanban_state(kanban_state),
       inbox_id: inbox_id,
       messages: push_messages,
       labels: label_list,
@@ -22,6 +23,24 @@ class Conversations::EventDataPresenter < SimpleDelegator
   end
 
   private
+
+  def build_kanban_state(kanban)
+    if kanban.nil?
+      return {
+        id: nil,
+        name: nil,
+        color: nil,
+        order: nil
+      }
+    else
+      return {
+        id: kanban.id,
+        name: kanban.name,
+        color: kanban.color,
+        order: kanban.order
+      }
+    end
+  end
 
   def push_messages
     [messages.chat.last&.push_event_data].compact

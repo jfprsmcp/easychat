@@ -145,7 +145,8 @@ class Message < ApplicationRecord
         name:conversation.conversation_state&.name,
         color:conversation.conversation_state&.color,
         description:conversation.conversation_state&.description
-      }
+      },
+      kanban_state: build_kanban_state(conversation.kanban_state),
     )
     data[:echo_id] = echo_id if echo_id.present?
     data[:attachments] = attachments.map(&:push_event_data) if attachments.present?
@@ -234,6 +235,24 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def build_kanban_state(kanban)
+    if kanban.nil?
+      return {
+        id: nil,
+        name: nil,
+        color: nil,
+        order: nil
+      }
+    else
+      return {
+        id: kanban.id,
+        name: kanban.name,
+        color: kanban.color,
+        order: kanban.order
+      }
+    end
+  end
 
   def prevent_message_flooding
     # Added this to cover the validation specs in messages

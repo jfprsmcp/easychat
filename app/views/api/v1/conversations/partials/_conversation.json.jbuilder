@@ -19,6 +19,20 @@ json.meta do
   end
   json.hmac_verified conversation.contact_inbox&.hmac_verified
 end
+json.kanban_state do
+  if conversation.kanban_states_id
+    kanban_state = KanbanState.find(conversation.kanban_states_id)
+    json.id kanban_state.id
+    json.name kanban_state.name
+    json.color kanban_state.color
+    json.order kanban_state.order
+  else
+    json.id nil
+    json.name nil
+    json.color nil
+    json.order nil
+  end
+end
 json.conversations_state_name conversation.conversations_state_id ? ConversationState.where(id: conversation.conversations_state_id).pick(:name) : nil
 json.conversations_state do 
   if conversation.conversations_state_id
