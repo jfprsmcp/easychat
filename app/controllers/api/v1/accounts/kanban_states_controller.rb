@@ -4,7 +4,12 @@ class Api::V1::Accounts::KanbanStatesController < Api::V1::Accounts::BaseControl
   before_action :check_authorization
 
   def index
-    @kanban_states = Current.account.kanban_states.order(:order)
+    @kanban_states = KanbanState.get_state_order(Current.account.id)
+    if @kanban_states.any?
+      @kanban_states.first["count"] = @kanban_states.last["count"]
+      @kanban_states.pop
+    end
+    @kanban_states
   end
 
   def create
