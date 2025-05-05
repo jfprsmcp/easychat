@@ -283,7 +283,7 @@ export default {
             </span>
           </template>
           <template v-else-if="chat.conversations_state_name==null && !showInboxName">
-            <span class="text-xs  text-slate-900 dark:text-slate-100 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-gray-500/10 ring-inset">
+            <span class="text-xs inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-gray-500/10 ring-inset">
                 no categorizada
             </span>
           </template>

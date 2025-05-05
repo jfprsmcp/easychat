@@ -17,6 +17,23 @@ export default {
         BoardHeader,
         BoardColumn
     },
+    methods: {
+        borderStyle(color) {
+            return {
+                border: "none",
+                height: "4px",
+                backgroundColor: color,
+                borderRadius: "20px",
+                margin: "12px 0px 0px 0px"
+            }
+        },
+        counterStyle(color) {
+            return {
+                backgroundColor: color,
+                color: "whitesmoke"
+            }
+        }
+    },
     computed: {
         ...mapGetters({
             columnList: 'getBoardConversations',
@@ -66,8 +83,16 @@ export default {
         />
         <div class="flex gap-5 p-5 content-card">
             <div v-for="(card) in kanbanStateList" :key="card.id" class="card">
-                <h3 class="card-title">{{ card.name }}</h3>
-                <BoardColumn @conversationLoad="" :column="card"  group="kanban" />
+                <div 
+                    class="card-title tabs-title"
+                >
+                    <span class="font-medium">{{ card.name }}</span>
+                    <div class="badge min-w-[20px]" :style="counterStyle(card.color)">
+                        <span>{{ card.count }}</span>
+                    </div>
+                </div>
+                <hr :style="borderStyle(card.color)"/>
+                <BoardColumn :column="card"  group="kanban" />
             </div>
         </div>
     </div>
@@ -93,7 +118,9 @@ export default {
 }
 
 .card-title {
-    box-shadow: 0px 1px 2px -1px darkgray;
-    padding: 2px 10px 10px 10px;
+    padding: 2px 5px 0px 5px;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
 }
 </style>

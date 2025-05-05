@@ -36,6 +36,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    hideInboxName: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -45,6 +49,7 @@ export default {
   computed: {
     ...mapGetters({
       currentChatId: 'getSelectChatId',
+      inboxesList: 'inboxes/getInboxes',
       activeInbox: 'getSelectedInbox',
       accountId: 'getCurrentAccountId',
     }),
@@ -73,6 +78,11 @@ export default {
     hasUnread() {
       return this.unreadCount > 0;
     },
+
+    isInboxNameVisible() {
+      return !this.activeInbox;
+    },
+
     lastMessageInChat() {
       return getLastMessage(this.chat);
     },

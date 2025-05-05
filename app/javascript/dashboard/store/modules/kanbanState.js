@@ -3,6 +3,7 @@ import types from '../mutation-types';
 import KanbanStatesAPI from '../../api/kanbanStates';
 import AnalyticsHelper from '../../helper/AnalyticsHelper';
 import { KANBAN_STATE_EVENTS } from '../../helper/AnalyticsHelper/events';
+import Vue from 'vue';
 export const state = {
   records: [],
   uiFlags: {
@@ -80,6 +81,9 @@ export const actions = {
       commit(types.SET_KANBAN_STATE_UI_FLAG, { isDeleting: false });
     }
   },
+  updateCount: function updateCount({ commit }, payload) {
+    commit(types.UPDATE_COUNT_KANBAN_STATE, payload);
+  }
 };
 
 export const mutations = {
@@ -93,6 +97,17 @@ export const mutations = {
   [types.ADD_KANBAN_STATE]: MutationHelpers.create,
   [types.EDIT_KANBAN_STATE]: MutationHelpers.update,
   [types.DELETE_KANBAN_STATE]: MutationHelpers.destroy,
+  [types.UPDATE_COUNT_KANBAN_STATE](_state, payload) {
+    const { columnIdIncrement, columnIdDecrement, value } = payload
+    let columnIncIndex = _state.records.findIndex((item) => item.id == columnIdIncrement)
+    let columnDecIndex = _state.records.findIndex((item) => item.id == columnIdDecrement)
+    if (columnIncIndex > -1) {
+      Vue.set(_state.records[columnIncIndex], 'count', _state.records[columnIncIndex].count + value);
+    }
+    if (columnDecIndex > -1) {
+      Vue.set(_state.records[columnDecIndex], 'count', _state.records[columnDecIndex].count - value);
+    }
+  },
 };
 
 export default {

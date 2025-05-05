@@ -71,7 +71,7 @@ export default {
     }
   },
   methods: {
-    add(e) {
+    async add(e) {
       let fromList = e.from.__vue__.list
       let toList = e.to.__vue__.list
       let item = e.item._underlying_vm_
@@ -80,7 +80,12 @@ export default {
           conversationId: item.id,
           kanban_states_id: (this.columnDefault) ? 'null' : this.column.id
         }
-        this.$store.dispatch('fetchUpdateKanbanStateConversation', params)
+        await this.$store.dispatch('fetchUpdateKanbanStateConversation', params)
+        this.$store.dispatch('kanbanState/updateCount', {
+          columnIdIncrement: e.to.id,
+          columnIdDecrement: e.from.id,
+          value: 1,
+        })
       } catch (error) {
         fromList.splice(e.oldIndex, 0, item)
         toList.splice(e.newIndex, 1)
@@ -99,8 +104,14 @@ export default {
 }
 </script>
 <template>
-  <Draggable ref="conversationListRef" class="flex flex-col gap-5 flex-1 overflow-auto pr-2 pb-2"
-    :list="conversationLists.data" group="column" @add="add">
+  <Draggable 
+    ref="conversationListRef" 
+    class="flex flex-col gap-1 flex-1 overflow-auto px-2 py-2"
+    :list="conversationLists.data" 
+    :id="conversationLists.id" 
+    group="column" 
+    @add="add"
+    >
     <ColumnItem v-for="(element) in conversationLists.data" :key="element.id" :source="element" />
     <template>
       <div v-if="loading" class="text-center">
