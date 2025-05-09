@@ -1095,6 +1095,7 @@ export default {
       :popout-reply-box="popoutReplyBox"
       @setReplyMode="setReplyMode"
       @click="$emit('click')"
+      @clickSuggestion="$emit('clickSuggestion', $event)"
     />
     <ArticleSearchPopover
       v-if="showArticleSearchPopover && connectedPortalSlug"

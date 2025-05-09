@@ -148,6 +148,7 @@
     "REPLYBOX": {
       "REPLY": "Reply",
       "PRIVATE_NOTE": "Private Note",
+      "SUGGESTION": "Suggestion",
       "SEND": "Send",
       "CREATE": "Add Note",
       "INSERT_READ_MORE": "Read more",

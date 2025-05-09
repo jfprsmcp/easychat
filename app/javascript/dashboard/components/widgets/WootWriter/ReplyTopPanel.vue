@@ -22,6 +22,11 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      suggestionActive: false
+    }
+  },
   setup(props, { emit }) {
     const replyTopRef = ref(null);
 
@@ -52,6 +57,12 @@ export default {
       replyTopRef,
     };
   },
+  methods: {
+    handleSuggestionClick() {
+      this.suggestionActive = !this.suggestionActive;
+      this.$emit('clickSuggestion', this.suggestionActive);
+    }
+  },
   computed: {
     replyButtonClass() {
       return {
@@ -71,6 +82,18 @@ export default {
         ? `${-this.charactersRemaining} ${CHAR_LENGTH_WARNING.NEGATIVE}`
         : `${this.charactersRemaining} ${CHAR_LENGTH_WARNING.UNDER_50}`;
     },
+    suggestionBtnClass() {
+      if (this.suggestionActive) {
+        return {
+          'secondary': true
+        }
+      }
+      return {
+        'button--note': true,
+        'clear': true,
+        'secondary': true
+      }
+    }
   },
 };
 </script>
@@ -98,6 +121,13 @@ export default {
         @click="handleNoteClick"
       >
         {{ $t('CONVERSATION.REPLYBOX.PRIVATE_NOTE') }}
+      </woot-button>
+      <woot-button
+        class="button"
+        :class="suggestionBtnClass"
+        @click="handleSuggestionClick"
+      >
+        {{ $t('CONVERSATION.REPLYBOX.SUGGESTION') }}
       </woot-button>
     </div>
     <div class="flex items-center mx-4 my-0">
