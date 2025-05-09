@@ -3,7 +3,6 @@ import { mapGetters } from 'vuex';
 import Board from '../../../components/Board.vue';
 import ConversationBoardBox from '../../../components/widgets/conversation/ConversationBoardBox.vue';
 import PopOverSearch from './search/PopOverSearch.vue';
-import wootConstants from 'dashboard/constants/globals';
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
 
@@ -66,8 +65,9 @@ export default {
     lengthConversationBoard() {
       this.setActiveChat();
     },
-    conversationId() {
+    conversationId(value) {
       this.fetchConversationIfUnavailable();
+      this.setExpandedLayout(value == 0)
     },
   },
   methods: {
@@ -137,7 +137,12 @@ export default {
       });
     },
     toggleConversationLayout() {
-      this.expandedLayout = !this.expandedLayout
+      this.setExpandedLayout(!this.expandedLayout)
+    },
+    setExpandedLayout(value) {
+      if (this.expandedLayout == value)
+        return
+      this.expandedLayout = value
       if (this.expandedLayout) {
         this.$router.push({ path: this.pathBoard })
       }
@@ -154,7 +159,7 @@ export default {
   <section class="bg-white conversation-page dark:bg-slate-900">
     <Board 
       :min-width="420" 
-      :expandedFull="!showMessageView" 
+      :expandedFull="expandedLayout" 
       @conversationLoad="onConversationLoad"
     >
       <PopOverSearch 
@@ -163,7 +168,7 @@ export default {
       />
     </Board>
     <ConversationBoardBox 
-      v-if="showMessageView" 
+      v-if="!expandedLayout" 
       :inbox-id="inboxId" 
       :is-contact-panel-open="isContactPanelOpen"
       :is-on-expanded-layout="expandedLayout" 
