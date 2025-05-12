@@ -139,7 +139,7 @@ export default {
           this.accountId,
           FEATURE_FLAGS.AGENT_BOTS
         ) &&
-        !(this.isAnEmailChannel || this.isATwitterInbox)
+        !(this.isATwitterInbox)
       ) {
         visibleToAllChannelTabs = [
           ...visibleToAllChannelTabs,
