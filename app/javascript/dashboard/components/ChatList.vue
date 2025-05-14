@@ -422,6 +422,7 @@ export default {
     },
   },
   mounted() {
+    this.$store.dispatch('kanbanState/get')
     this.$store.dispatch('setChatListFilters', this.conversationFilters);
     this.setFiltersFromUISettings();
     this.$store.dispatch('setChatStatusFilter', this.activeStatus);
