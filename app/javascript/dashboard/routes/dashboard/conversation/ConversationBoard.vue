@@ -47,9 +47,6 @@ export default {
     pathBoard(){
       return `/app/accounts/${this.accountId}/board`
     },
-    showMessageView() {
-      return this.conversationId ? true : !this.expandedLayout;
-    },
     isContactPanelOpen() {
       if (this.currentChatId) {
         const { is_contact_sidebar_open: isContactSidebarOpen } = this.uiSettings;
@@ -152,6 +149,7 @@ export default {
     this.$store.dispatch('agents/get');
     this.initialize();
     this.$watch('$store.state.route', () => this.initialize());
+    this.setExpandedLayout(this.conversationId == 0)
   }
 }
 </script>

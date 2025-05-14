@@ -8,6 +8,7 @@ import ConversationLabels from './labels/LabelBox.vue';
 import agentMixin from 'dashboard/mixins/agentMixin';
 import { CONVERSATION_PRIORITY } from '../../../../shared/constants/messages';
 import { CONVERSATION_EVENTS } from '../../../helper/AnalyticsHelper/events';
+import boardConstants from 'dashboard/constants/board';
 
 export default {
   components: {
@@ -31,6 +32,7 @@ export default {
   },
   data() {
     return {
+      oldAssignedKanbanState: undefined,
       priorityOptions: [
         {
           id: null,
@@ -65,6 +67,7 @@ export default {
       currentChat: 'getSelectedChatBoard',
       currentUser: 'getCurrentUser',
       teams: 'teams/getTeams',
+      kanbanState: 'kanbanState/getKanbanState',
     }),
     hasAnAssignedTeam() {
       return !!this.currentChat?.meta?.team;
@@ -144,6 +147,32 @@ export default {
           });
       },
     },
+    assignedKanbanState: {
+      get() {
+        const { id } = this.currentChat.kanban_state
+        if (id == null) {
+          return this.kanbanState[0]
+        }
+        return this.currentChat.kanban_state
+      },
+      async set(selectedKanbanState) {
+        try {
+          this.moveConversationColumn(selectedKanbanState)
+          await this.updateKanbanState(selectedKanbanState);
+          this.updateQueryParams(selectedKanbanState)
+          this.updateCountColumn({
+            columnIdIncrement: selectedKanbanState.id,
+            columnIdDecrement: this.oldAssignedKanbanState.id
+          });
+          useAlert(this.$t('CONVERSATION.KANBAN_STATE.CHANGE_PRIORITY.SUCCESSFUL', {
+            state: selectedKanbanState.name,
+            conversationId: this.conversationId,
+          }));
+        } catch (error) {
+          console.warn({ error })
+        }
+      }
+    },
     showSelfAssign() {
       if (!this.assignedAgent) {
         return true;
@@ -201,6 +230,48 @@ export default {
 
       this.assignedPriority = isSamePriority ? null : selectedPriorityItem;
     },
+
+    onClickAssignKanbanState(selectedKanbaStateItem) {
+      if (this.assignedKanbanState.id == selectedKanbaStateItem.id)
+        return
+      if (this.kanbanState.length == 0)
+        return
+      this.oldAssignedKanbanState = this.assignedKanbanState
+      this.assignedKanbanState = selectedKanbaStateItem
+    },
+
+    async updateKanbanState(selectedKanbanState) {
+      let stateId = selectedKanbanState.id
+      if (selectedKanbanState.id == this.kanbanState[0].id)
+        stateId = 'null'
+      await this.$store.dispatch('fetchUpdateKanbanStateConversation', {
+        params: {
+          conversationId: this.conversationId,
+          kanban_states_id: stateId
+        },
+        kanbanState: boardConstants.mapKanbanState(selectedKanbanState)
+      })
+    },
+
+    moveConversationColumn(selectedKanbanState) {
+      this.$store.dispatch('moveConversationBoard', { kanbanState: selectedKanbanState })
+    },
+
+    updateQueryParams(kanbanState) {
+      if (boardConstants.isColumnOrderZero(kanbanState)) {
+        this.$router.push({ query: {} })
+        return
+      }
+      this.$router.push({ query: { columnId: kanbanState.id } })
+    },
+
+    updateCountColumn({ columnIdIncrement, columnIdDecrement }) {
+      this.$store.dispatch('kanbanState/updateCount', {
+        columnIdIncrement,
+        columnIdDecrement,
+        value: 1
+      })
+    }
   },
 };
 </script>
@@ -273,6 +344,18 @@ export default {
           $t('CONVERSATION.PRIORITY.CHANGE_PRIORITY.INPUT_PLACEHOLDER')
         "
         @click="onClickAssignPriority"
+      />
+    </div>
+    <div class="multiselect-wrap--small">
+      <ContactDetailsItem compact :title="$t('CONVERSATION.KANBAN_STATE.TITLE')" />
+      <MultiselectDropdown
+        :options="kanbanState"
+        :selected-item="assignedKanbanState"
+        :multiselector-title="$t('CONVERSATION.KANBAN_STATE.TITLE')"
+        :multiselector-placeholder="$t('CONVERSATION.KANBAN_STATE.CHANGE_PRIORITY.SELECT_PLACEHOLDER')"
+        :no-search-result="$t('CONVERSATION.KANBAN_STATE.CHANGE_PRIORITY.NO_RESULTS')"
+        :input-placeholder="$t('CONVERSATION.KANBAN_STATE.CHANGE_PRIORITY.INPUT_PLACEHOLDER')"
+        @click="onClickAssignKanbanState"
       />
     </div>
     <ContactDetailsItem

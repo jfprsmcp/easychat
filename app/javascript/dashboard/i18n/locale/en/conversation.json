@@ -105,6 +105,16 @@
         "FAILED": "Couldn't change priority. Please try again."
       }
     },
+    "KANBAN_STATE":{
+      "TITLE": "Board",
+      "CHANGE_PRIORITY":{
+        "SELECT_PLACEHOLDER": "None",
+        "INPUT_PLACEHOLDER": "Select state",
+        "NO_RESULTS": "No results found",
+        "SUCCESSFUL": "Changed state of conversation id %{conversationId} to %{state}",
+        "FAILED": "Couldn't change state. Please try again."
+      }
+    },
     "CARD_CONTEXT_MENU": {
       "PENDING": "Mark as pending",
       "RESOLVED": "Mark as resolved",

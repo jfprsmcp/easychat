@@ -1,6 +1,7 @@
 import { MESSAGE_TYPE } from 'shared/constants/messages';
 import { applyPageFilters, sortComparator } from './helpers';
 import filterQueryGenerator from 'dashboard/helper/filterQueryGenerator';
+import boardConstants from 'dashboard/constants/board';
 
 export const getSelectedChatConversation = ({
   allConversations,
@@ -13,23 +14,31 @@ export const getSelectedChatConversationBoard = ({
   selectedChatId,
   selectedChatColumnId
 }) => {
-  let selectedChat
-  if (selectedChatColumnId == 0) {
-    for (const column of boardConversations) {
-      if (column.order == 0) {
-        selectedChat = column.data.find((conversation) => conversation.id == selectedChatId)
-        break
-      }
-    }
-    return selectedChat
+  if (selectedChatColumnId == boardConstants.COLUMN_DEFAULT) {
+    let column = boardConversations.find((col) => boardConstants.isColumnOrderZero(col))
+    if (!column) return undefined
+    return column.data.find((conversation) => conversation.id == selectedChatId)
   }
-  for (const column of boardConversations) {
-    if (column.id == selectedChatColumnId) {
-      selectedChat = column.data.find((conversation) => conversation.id == selectedChatId)
-      break
-    }
+  let column = boardConversations.find((col) => col.id == selectedChatColumnId)
+  if (!column) return undefined
+  return column.data.find((conversation) => conversation.id == selectedChatId)
+}
+
+export const getSelectedRemoveChatConversationBoard = ({
+  boardConversations,
+  selectedChatId,
+  selectedChatColumnId
+}) => {
+  let column
+  if (selectedChatColumnId == boardConstants.COLUMN_DEFAULT) {
+    column = boardConversations.find((col) => boardConstants.isColumnOrderZero(col))
+  } else {
+    column = boardConversations.find((col) => col.id == selectedChatColumnId)
   }
-  return selectedChat 
+  if (!column) return undefined
+  const conversationIndex = column.data.findIndex(c => c.id == selectedChatId)
+  if (conversationIndex < 0) return undefined
+  return column.data.splice(conversationIndex, 1)[0]
 }
 
 const getters = {

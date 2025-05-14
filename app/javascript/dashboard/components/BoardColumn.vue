@@ -4,6 +4,8 @@ import Draggable from 'vuedraggable';
 import { mapGetters } from 'vuex';
 import ColumnItem from './ColumnItem.vue';
 import IntersectionObserver from './IntersectionObserver.vue';
+import boardConstants from 'dashboard/constants/board';
+
 export default {
   props: {
     column:{
@@ -72,15 +74,19 @@ export default {
   },
   methods: {
     async add(e) {
+      let toColumnState = e.to.__vue__.$parent.column
       let fromList = e.from.__vue__.list
       let toList = e.to.__vue__.list
       let item = e.item._underlying_vm_
       try {
-        let params = {
-          conversationId: item.id,
-          kanban_states_id: (this.columnDefault) ? 'null' : this.column.id
+        let payload = {
+          params: {
+            conversationId: item.id,
+            kanban_states_id: (this.columnDefault) ? 'null' : this.column.id,
+          },
+          kanbanState: boardConstants.mapKanbanState(toColumnState)
         }
-        await this.$store.dispatch('fetchUpdateKanbanStateConversation', params)
+        await this.$store.dispatch('fetchUpdateKanbanStateConversation', payload)
         this.$store.dispatch('kanbanState/updateCount', {
           columnIdIncrement: e.to.id,
           columnIdDecrement: e.from.id,

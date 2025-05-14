@@ -1,10 +1,15 @@
 import Vue from 'vue';
 import types from '../../mutation-types';
-import getters, { getSelectedChatConversation, getSelectedChatConversationBoard } from './getters';
+import getters, {
+  getSelectedChatConversation,
+  getSelectedChatConversationBoard,
+  getSelectedRemoveChatConversationBoard
+} from './getters';
 import actions from './actions';
 import { findPendingMessageIndex } from './helpers';
 import { MESSAGE_STATUS } from 'shared/constants/messages';
 import wootConstants from 'dashboard/constants/globals';
+import boardConstants from 'dashboard/constants/board';
 import { BUS_EVENTS } from '../../../../shared/constants/busEvents';
 import { emitter } from 'shared/helpers/mitt';
 
@@ -100,8 +105,8 @@ export const mutations = {
     _state.boardConversations = []
   },
   [types.SET_ALL_MESSAGES_LOADED](_state) {
-      const [chat] = getSelectedChatConversation(_state);
-      Vue.set(chat, 'allMessagesLoaded', true);
+    const [chat] = getSelectedChatConversation(_state);
+    Vue.set(chat, 'allMessagesLoaded', true);
   },
 
   [types.SET_ALL_MESSAGES_BOARD_LOADED](_state) {
@@ -307,7 +312,7 @@ export const mutations = {
   [types.ADD_MESSAGE_BOARD](_state, message) {
     try {
       const { conversation_id: conversationId, kanban_state } = message;
-      let selectedChatColumnId = kanban_state.id ?? _state.selectedChatColumnId ?? 0;
+      let selectedChatColumnId = kanban_state?.id ?? _state.selectedChatColumnId ?? 0;
       const chat = getSelectedChatConversationBoard({ ..._state, selectedChatColumnId, selectedChatId: conversationId })
       if (!chat) return;
 
@@ -341,7 +346,7 @@ export const mutations = {
         return
       }
       _state.boardConversations = _state.boardConversations.map((column) => {
-        if (column.order == 0) {
+        if (boardConstants.isColumnOrderZero(column)) {
           return { ...column, data: [conversation, ...column.data] }
         }
         return column
@@ -377,7 +382,7 @@ export const mutations = {
       const { boardConversations } = _state;
       let columnId = conversation.kanban_state.id
       const matchFunction = (columnId == null)
-        ? (column) => column.order == 0
+        ? (column) => boardConstants.isColumnOrderZero(column)
         : (column) => column.id == columnId;
       const columnIndex = boardConversations.findIndex(matchFunction)
       if (columnIndex < 0) {
@@ -447,6 +452,40 @@ export const mutations = {
     if (chat) {
       Vue.set(chat.meta, 'sender', payload);
     }
+  },
+
+  [types.UPDATE_PROPERTIES_CONVERSATION](_state, { conversationId, properties }) {
+    const [chat] = getSelectedChatConversation({
+      allConversations: _state.allConversations,
+      selectedChatId: conversationId
+    })
+    if (!chat) {
+      return
+    }
+    Vue.set(chat, `${properties.key}`, properties.value);
+  },
+
+  [types.UPDATE_PROPERTIES_CONVERSATION_BOARD](_state, { conversationId, columnId ,properties }) {
+    const chat = getSelectedChatConversationBoard({
+      boardConversations: _state.boardConversations,
+      selectedChatId: conversationId,
+      selectedChatColumnId: columnId ?? boardConstants.COLUMN_DEFAULT
+    })
+    if (!chat) {
+      return
+    }
+    Vue.set(chat, `${properties.key}`, properties.value);
+  },
+
+  [types.MOVE_CONVERSATION_BOARD](_state, { kanbanState }) {
+    const chat = getSelectedRemoveChatConversationBoard(_state)
+    if (!chat) {
+      return
+    }
+    let column = _state.boardConversations.find((col) => col.id == kanbanState.id)
+    if (column < 0) return
+    _state.selectedChatColumnId = (kanbanState.order == 0) ? boardConstants.COLUMN_DEFAULT : kanbanState.id
+    column.data.unshift(chat)
   },
 
   [types.SET_ACTIVE_INBOX](_state, inboxId) {

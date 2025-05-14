@@ -61,6 +61,10 @@ const TYPE_LIST = {
     default: types.ADD_CONVERSATION,
     board: types.ADD_CONVERSATION_BOARD
   },
+  UPDATE_PROPERTIES_CONVERSATION: {
+    default: types.UPDATE_PROPERTIES_CONVERSATION,
+    board: types.UPDATE_PROPERTIES_CONVERSATION_BOARD
+  }
 }
 
 export const hasMessageFailedWithExternalError = pendingMessage => {
@@ -125,13 +129,39 @@ const actions = {
     }
   },
   fetchUpdateKanbanStateConversation: async ({ commit, state, dispatch }, payload) => {
-    let { conversationId, ...attributes } = payload
+    const { params, kanbanState } = payload
+    const { conversationId, ...attributes } = params
     try {
       await ConversationApi.update({ conversationId, attributes })
+      commit(getTypeList(types.UPDATE_PROPERTIES_CONVERSATION), {
+        conversationId,
+        columnId: kanbanState.id,
+        properties: {
+          key: "kanban_state",
+          value: kanbanState
+        }
+      });
     } catch (error) {
       throw error;
     }
   },
+
+  updatePropertiesConversation({ commit, state, dispatch }, payload) {
+    try {
+      commit(getTypeList(types.UPDATE_PROPERTIES_CONVERSATION), payload)
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
+
+  moveConversationBoard: ({ commit, state, dispatch }, payload) => {
+    try {
+      commit(types.MOVE_CONVERSATION_BOARD, payload)
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
+
   clearConversationBoard({ commit }) {
     commit(types.CLEAR_CONVERSATION_BOARD);
   },

@@ -105,6 +105,16 @@
         "FAILED": "No se pudo cambiar la prioridad. Por favor, inténtelo de nuevo."
       }
     },
+     "KANBAN_STATE":{
+      "TITLE": "Tablero",
+      "CHANGE_PRIORITY":{
+        "SELECT_PLACEHOLDER": "Ninguna",
+        "INPUT_PLACEHOLDER": "Seleccionar estado",
+        "NO_RESULTS": "No se encontraron resultados",
+        "SUCCESSFUL": "Se ha cambiado el estado del id de conversación %{conversationId} a %{state}",
+        "FAILED": "No se pudo cambiar el estado. Por favor, inténtelo de nuevo."
+      }
+    },
     "CARD_CONTEXT_MENU": {
       "PENDING": "Marcar como pendiente",
       "RESOLVED": "Marcar como resuelto",
