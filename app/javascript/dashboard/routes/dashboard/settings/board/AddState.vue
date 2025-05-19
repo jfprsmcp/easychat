@@ -34,7 +34,7 @@ export default {
     async addState() {
       try {
         await this.$store.dispatch('kanbanState/create', {
-          name: this.name.toLowerCase(),
+          name: this.name,
           color: this.color,
         });
         useAlert(this.$t('BOARD.ADD.API.SUCCESS_MESSAGE'));
@@ -55,7 +55,7 @@ export default {
       <woot-input 
         v-model.trim="name" 
         :class="{ error: v$.name.$error }" 
-         class="w-full label-name--input"
+         class="w-full"
         :label="$t('BOARD.FORM.NAME.LABEL')" 
         :placeholder="$t('BOARD.FORM.NAME.PLACEHOLDER')"
         :error="stateNameErrorMessage" data-testid="label-name"
@@ -82,13 +82,3 @@ export default {
     </form>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.label-name--input {
-  ::v-deep {
-    input {
-      @apply lowercase;
-    }
-  }
-}
-</style>

@@ -19,8 +19,7 @@
                 "LABEL": "Estado Nombre",
                 "PLACEHOLDER": "Estado nombre",
                 "REQUIRED_ERROR": "Estado nombre es requrido",
-                "MINIMUM_LENGTH_ERROR": "Se requiere una longitud mínima de 3",
-                "VALID_ERROR": "Solo se permiten letras, números, guiones y guiones bajos."
+                "MINIMUM_LENGTH_ERROR": "Se requiere una longitud mínima de 3"
             },
             "COLOR": {
                 "LABEL": "Color"

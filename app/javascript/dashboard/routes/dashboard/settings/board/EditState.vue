@@ -50,7 +50,7 @@ export default {
       this.$store.dispatch('kanbanState/update', {
         id: this.selectedResponse.id,
         color: this.color,
-        name: this.name.toLowerCase(),
+        name: this.name,
       }).then(() => {
         useAlert(this.$t('BOARD.EDIT.API.SUCCESS_MESSAGE'));
         setTimeout(() => this.onClose(), 10);
@@ -69,7 +69,7 @@ export default {
       <woot-input
         v-model.trim="name"
         :class="{ error: v$.name.$error }"
-        class="w-full label-name--input"
+        class="w-full"
         :label="$t('BOARD.FORM.NAME.LABEL')"
         :placeholder="$t('BOARD.FORM.NAME.PLACEHOLDER')"
         :error="labelNameErrorMessage"
@@ -96,14 +96,3 @@ export default {
     </form>
   </div>
 </template>
-
-<style lang="scss" scoped>
-// Label API supports only lowercase letters
-.label-name--input {
-  ::v-deep {
-    input {
-      @apply lowercase;
-    }
-  }
-}
-</style>

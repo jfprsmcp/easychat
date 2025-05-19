@@ -19,8 +19,7 @@
                 "LABEL": "State Name",
                 "PLACEHOLDER": "State name",
                 "REQUIRED_ERROR": "State name is required",
-                "MINIMUM_LENGTH_ERROR": "Minimum length 2 is required",
-                "VALID_ERROR": "Only Alphabets, Numbers, Hyphen and Underscore are allowed"
+                "MINIMUM_LENGTH_ERROR": "Minimum length 2 is required"
             },
             "COLOR": {
                 "LABEL": "Color"

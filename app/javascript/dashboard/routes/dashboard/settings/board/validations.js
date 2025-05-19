@@ -1,7 +1,5 @@
 import { required, minLength } from '@vuelidate/validators';
 
-export const validSorterCharacters = (str = '') => !!str && !str.includes(' ');
-
 export const getStateNameErrorMessage = validation => {
   if (!validation.name.$error) {
     return '';
@@ -12,16 +10,12 @@ export const getStateNameErrorMessage = validation => {
   if (!validation.name.minLength) {
     return 'BOARD.FORM.NAME.MINIMUM_LENGTH_ERROR';
   }
-  if (!validation.name.validSorterCharacters) {
-    return 'BOARD.FORM.NAME.VALID_ERROR';
-  }
 };
 
 export default {
   name: {
     required,
-    minLength: minLength(3),
-    validSorterCharacters,
+    minLength: minLength(3)
   },
   color: {
     required,
