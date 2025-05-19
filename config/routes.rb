@@ -179,6 +179,11 @@ Rails.application.routes.draw do
               put :update_order_batch
             end
           end
+          resources :agents_cloud, only: [] do
+            collection do
+              get :suggestion_message
+            end
+          end
           resources :response_sources, only: [:create] do
             collection do
               post :parse
