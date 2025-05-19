@@ -5,6 +5,10 @@ import { REPLY_EDITOR_MODES, CHAR_LENGTH_WARNING } from './constants';
 export default {
   name: 'ReplyTopPanel',
   props: {
+    openSuggestion: {
+      type: Boolean,
+      default: false
+    },
     mode: {
       type: String,
       default: REPLY_EDITOR_MODES.REPLY,
@@ -21,11 +25,6 @@ export default {
       type: Boolean,
       default: false,
     },
-  },
-  data() {
-    return {
-      suggestionActive: false
-    }
   },
   setup(props, { emit }) {
     const replyTopRef = ref(null);
@@ -59,8 +58,7 @@ export default {
   },
   methods: {
     handleSuggestionClick() {
-      this.suggestionActive = !this.suggestionActive;
-      this.$emit('clickSuggestion', this.suggestionActive);
+      this.$emit('clickSuggestion', !this.openSuggestion);
     }
   },
   computed: {
@@ -83,9 +81,10 @@ export default {
         : `${this.charactersRemaining} ${CHAR_LENGTH_WARNING.UNDER_50}`;
     },
     suggestionBtnClass() {
-      if (this.suggestionActive) {
+      if (this.openSuggestion) {
         return {
-          'secondary': true
+          'secondary': true,
+          'btn-suggestion-active':true
         }
       }
       return {
@@ -127,7 +126,7 @@ export default {
         :class="suggestionBtnClass"
         @click="handleSuggestionClick"
       >
-        {{ $t('CONVERSATION.REPLYBOX.SUGGESTION') }}
+        {{ $t('CONVERSATION.REPLYBOX.SUGGESTION.BTN') }}
       </woot-button>
     </div>
     <div class="flex items-center mx-4 my-0">
@@ -186,5 +185,8 @@ export default {
 }
 .button--note {
   @apply text-yellow-600 dark:text-yellow-600 bg-transparent dark:bg-transparent;
+}
+.btn-suggestion-active {
+  background-color: var(--green-suggetion);
 }
 </style>

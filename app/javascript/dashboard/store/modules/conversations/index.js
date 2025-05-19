@@ -30,6 +30,8 @@ const state = {
   conversationLastSeen: null,
   syncConversationsMessages: {},
   conversationFilters: {},
+  suggestionMessages: [],
+  selectedSuggestionMessage: '',
 };
 
 // mutations
@@ -108,7 +110,15 @@ export const mutations = {
     const [chat] = getSelectedChatConversation(_state);
     Vue.set(chat, 'allMessagesLoaded', true);
   },
-
+  [types.SET_SELECTED_SUGGESTION_MESSAGE](_state, message) {
+    _state.selectedSuggestionMessage = message
+  },
+  [types.SET_SUGGESTION_MESSAGE](_state, messages) {
+    _state.suggestionMessages = messages
+  },
+  [types.CLEAR_SUGGESTION_MESSAGE](_state) {
+    _state.suggestionMessages = []
+  },
   [types.SET_ALL_MESSAGES_BOARD_LOADED](_state) {
     try {
       const chat = getSelectedChatConversationBoard(_state);

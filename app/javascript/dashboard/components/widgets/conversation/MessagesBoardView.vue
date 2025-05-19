@@ -238,6 +238,7 @@ export default {
       if (newChat.id === oldChat.id) {
         return;
       }
+      this.openSuggestion = false
       this.fetchAllAttachmentsFromCurrentChat();
       this.fetchSuggestions();
       this.messageSentSinceOpened = false;
@@ -526,7 +527,8 @@ export default {
           />
         </ul>
         <ConversationMessageSuggestion 
-          :open="openSuggestion"  
+          :open="openSuggestion"
+          :conversationId="currentChat.id"
         />
     </div>
     <div
@@ -552,6 +554,7 @@ export default {
       <ReplyBoardBox
         :conversation-id="currentChat.id"
         :popout-reply-box.sync="isPopOutReplyBox"
+        :openSuggestion="openSuggestion"
         @click="showPopOutReplyBox"
         @clickSuggestion="clickSuggestion"
       />

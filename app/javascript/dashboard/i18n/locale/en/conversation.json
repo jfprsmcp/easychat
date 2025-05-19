@@ -158,7 +158,10 @@
     "REPLYBOX": {
       "REPLY": "Reply",
       "PRIVATE_NOTE": "Private Note",
-      "SUGGESTION": "Suggestion",
+       "SUGGESTION": {
+        "BTN": "AI Assistant 💡",
+        "TITLE": "Suggested answer 💡"
+      },
       "SEND": "Send",
       "CREATE": "Add Note",
       "INSERT_READ_MORE": "Read more",

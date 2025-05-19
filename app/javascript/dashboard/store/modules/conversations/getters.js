@@ -42,6 +42,12 @@ export const getSelectedRemoveChatConversationBoard = ({
 }
 
 const getters = {
+  getSuggestionMessages: ({ suggestionMessages }) => {
+    return suggestionMessages
+  },
+  getSelectedSuggestionMessage: ({ selectedSuggestionMessage }) => {
+    return selectedSuggestionMessage
+  },
   getAllConversations: ({ allConversations, chatSortFilter: sortKey }) => {
     return allConversations.sort((a, b) => sortComparator(a, b, sortKey));
   },

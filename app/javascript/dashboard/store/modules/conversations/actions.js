@@ -15,6 +15,7 @@ import messageReadActions from './actions/messageReadActions';
 import messageTranslateActions from './actions/messageTranslateActions';
 import * as Sentry from '@sentry/browser';
 import router from '../../../routes';
+import agentCloud from '../../../api/agentCloud';
 
 const TYPE_LIST = {
   SET_ALL_MESSAGES_LOADED: {
@@ -90,6 +91,28 @@ export const getTypeList = (type) => {
 
 // actions
 const actions = {
+  getSuggestionMessage: async ({ commit }, payload) => {
+    const { conversationId, count_responses } = payload
+    const response = await agentCloud.getSuggestionMessage({ conversation_display_id: conversationId, count_responses });
+    if (!response.data.status)
+      return
+    const messsages = JSON.parse(response.data.data);
+    commit(types.SET_SUGGESTION_MESSAGE, messsages)
+  },
+  clearSuggestionMessage: ({ commit }) => {
+    try {
+      commit(types.CLEAR_SUGGESTION_MESSAGE);
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
+  setSelectedMessageSuggestion: ({ commit }, message) => {
+    try {
+      commit(types.SET_SELECTED_SUGGESTION_MESSAGE, message);
+    } catch (error) {
+      console.warn({ error })
+    }
+  },
   getConversation: async ({ commit }, conversationId) => {
     try {
       const response = await ConversationApi.show(conversationId);
