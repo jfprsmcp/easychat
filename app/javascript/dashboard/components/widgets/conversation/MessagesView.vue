@@ -9,6 +9,7 @@ import ReplyBox from './ReplyBox.vue';
 import Message from './Message.vue';
 import ConversationLabelSuggestion from './conversation/LabelSuggestion.vue';
 import Banner from 'dashboard/components/ui/Banner.vue';
+import ConversationMessageSuggestion from './ConversationMessageSuggestion.vue';
 
 // stores and apis
 import { mapGetters } from 'vuex';
@@ -39,6 +40,7 @@ export default {
     ReplyBox,
     Banner,
     ConversationLabelSuggestion,
+    ConversationMessageSuggestion
   },
   mixins: [inboxMixin, aiMixin],
   props: {
@@ -89,6 +91,7 @@ export default {
       isProgrammaticScroll: false,
       messageSentSinceOpened: false,
       labelSuggestions: [],
+      openSuggestion: false
     };
   },
 
@@ -235,6 +238,7 @@ export default {
       if (newChat.id === oldChat.id) {
         return;
       }
+      this.openSuggestion = false;
       this.fetchAllAttachmentsFromCurrentChat();
       this.fetchSuggestions();
       this.messageSentSinceOpened = false;
@@ -439,6 +443,9 @@ export default {
         return false;
       });
     },
+    clickSuggestion(value) {
+      this.openSuggestion = value
+    }
   },
 };
 </script>
@@ -465,58 +472,64 @@ export default {
         @click="onToggleContactPanel"
       />
     </div>
-    <ul class="conversation-panel">
-      <transition name="slide-up">
-        <li class="min-h-[4rem]">
-          <span v-if="shouldShowSpinner" class="spinner message" />
+    <div class="conversation-message-content">
+      <ul class="conversation-panel">
+        <transition name="slide-up">
+          <li class="min-h-[4rem]">
+            <span v-if="shouldShowSpinner" class="spinner message" />
+          </li>
+        </transition>
+        <Message
+          v-for="message in readMessages"
+          :key="message.id"
+          class="message--read ph-no-capture"
+          data-clarity-mask="True"
+          :data="message"
+          :is-a-tweet="isATweet"
+          :is-a-whatsapp-channel="isAWhatsAppChannel"
+          :is-web-widget-inbox="isAWebWidgetInbox"
+          :is-a-facebook-inbox="isAFacebookInbox"
+          :is-an-email-inbox="isAnEmailChannel"
+          :is-instagram="isInstagramDM"
+          :inbox-supports-reply-to="inboxSupportsReplyTo"
+          :in-reply-to="getInReplyToMessage(message)"
+        />
+        <li v-show="unreadMessageCount != 0" class="unread--toast">
+          <span>
+            {{ unreadMessageCount > 9 ? '9+' : unreadMessageCount }}
+            {{
+              unreadMessageCount > 1
+                ? $t('CONVERSATION.UNREAD_MESSAGES')
+                : $t('CONVERSATION.UNREAD_MESSAGE')
+            }}
+          </span>
         </li>
-      </transition>
-      <Message
-        v-for="message in readMessages"
-        :key="message.id"
-        class="message--read ph-no-capture"
-        data-clarity-mask="True"
-        :data="message"
-        :is-a-tweet="isATweet"
-        :is-a-whatsapp-channel="isAWhatsAppChannel"
-        :is-web-widget-inbox="isAWebWidgetInbox"
-        :is-a-facebook-inbox="isAFacebookInbox"
-        :is-an-email-inbox="isAnEmailChannel"
-        :is-instagram="isInstagramDM"
-        :inbox-supports-reply-to="inboxSupportsReplyTo"
-        :in-reply-to="getInReplyToMessage(message)"
+        <Message
+          v-for="message in unReadMessages"
+          :key="message.id"
+          class="message--unread ph-no-capture"
+          data-clarity-mask="True"
+          :data="message"
+          :is-a-tweet="isATweet"
+          :is-a-whatsapp-channel="isAWhatsAppChannel"
+          :is-web-widget-inbox="isAWebWidgetInbox"
+          :is-a-facebook-inbox="isAFacebookInbox"
+          :is-instagram-dm="isInstagramDM"
+          :inbox-supports-reply-to="inboxSupportsReplyTo"
+          :in-reply-to="getInReplyToMessage(message)"
+        />
+        <ConversationLabelSuggestion
+          v-if="shouldShowLabelSuggestions"
+          :suggested-labels="labelSuggestions"
+          :chat-labels="currentChat.labels"
+          :conversation-id="currentChat.id"
+        />
+      </ul>
+      <ConversationMessageSuggestion
+            :open="openSuggestion"
+            :conversationId="currentChat.id"
       />
-      <li v-show="unreadMessageCount != 0" class="unread--toast">
-        <span>
-          {{ unreadMessageCount > 9 ? '9+' : unreadMessageCount }}
-          {{
-            unreadMessageCount > 1
-              ? $t('CONVERSATION.UNREAD_MESSAGES')
-              : $t('CONVERSATION.UNREAD_MESSAGE')
-          }}
-        </span>
-      </li>
-      <Message
-        v-for="message in unReadMessages"
-        :key="message.id"
-        class="message--unread ph-no-capture"
-        data-clarity-mask="True"
-        :data="message"
-        :is-a-tweet="isATweet"
-        :is-a-whatsapp-channel="isAWhatsAppChannel"
-        :is-web-widget-inbox="isAWebWidgetInbox"
-        :is-a-facebook-inbox="isAFacebookInbox"
-        :is-instagram-dm="isInstagramDM"
-        :inbox-supports-reply-to="inboxSupportsReplyTo"
-        :in-reply-to="getInReplyToMessage(message)"
-      />
-      <ConversationLabelSuggestion
-        v-if="shouldShowLabelSuggestions"
-        :suggested-labels="labelSuggestions"
-        :chat-labels="currentChat.labels"
-        :conversation-id="currentChat.id"
-      />
-    </ul>
+    </div>
     <div
       ref="conversationFooterRef"
       class="conversation-footer"
@@ -540,6 +553,8 @@ export default {
       <ReplyBox
         :conversation-id="currentChat.id"
         :popout-reply-box.sync="isPopOutReplyBox"
+        :openSuggestion="openSuggestion"
+        @clickSuggestion="clickSuggestion"
         @click="showPopOutReplyBox"
       />
     </div>
@@ -584,5 +599,16 @@ export default {
       @apply absolute left-auto bottom-1;
     }
   }
+}
+.conversation-message-content {
+  position: relative;
+  margin: 0px;
+  display: flex;
+  height: 100%;
+  flex-shrink: 1;
+  flex-grow: 1;
+  flex-basis: 1px;
+  flex-direction: row;
+  overflow-y: auto;
 }
 </style>

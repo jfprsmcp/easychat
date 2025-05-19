@@ -72,6 +72,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    openSuggestion: {
+      type: Boolean,
+      default: false
+    }
   },
   setup() {
     const {
@@ -125,6 +129,7 @@ export default {
       currentUser: 'getCurrentUser',
       lastEmail: 'getLastEmailInSelectedChat',
       globalConfig: 'globalConfig/get',
+      suggestionMessage: 'getSelectedSuggestionMessage',
     }),
     currentContact() {
       return this.$store.getters['contacts/getContact'](
@@ -434,6 +439,9 @@ export default {
       this.setToDraft(this.conversationIdByRoute, oldReplyType);
       this.getFromDraft();
     },
+    suggestionMessage(value) {
+      this.message += value
+    }
   },
 
   mounted() {
@@ -1093,8 +1101,10 @@ export default {
       :is-message-length-reaching-threshold="isMessageLengthReachingThreshold"
       :characters-remaining="charactersRemaining"
       :popout-reply-box="popoutReplyBox"
+      :open-suggestion="openSuggestion"
       @setReplyMode="setReplyMode"
       @click="$emit('click')"
+      @clickSuggestion="$emit('clickSuggestion', $event)" 
     />
     <ArticleSearchPopover
       v-if="showArticleSearchPopover && connectedPortalSlug"
