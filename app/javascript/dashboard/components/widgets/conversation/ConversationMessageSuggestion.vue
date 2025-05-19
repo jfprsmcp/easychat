@@ -54,6 +54,8 @@ export default {
             this.$store.dispatch('clearSuggestionMessage')
         },
         fetchSuggestionMessage() {
+            if (!this.open)
+                return
             this.syncronized(async () => {
                 try {
                     this.loading = true

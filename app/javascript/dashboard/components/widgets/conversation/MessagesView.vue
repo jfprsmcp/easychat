@@ -329,6 +329,7 @@ export default {
           this.fetchPreviousMessages();
         } else {
           this.scrollToBottom();
+          this.triggerClickFetchSuggestionMessage()
         }
       });
       this.makeMessagesRead();
@@ -445,6 +446,12 @@ export default {
     },
     clickSuggestion(value) {
       this.openSuggestion = value
+    },
+    triggerClickFetchSuggestionMessage() {
+      const childComponent = this.$refs.conversationMessageSuggestion;
+      if (childComponent && typeof childComponent.fetchSuggestionMessage === 'function') {
+        childComponent.fetchSuggestionMessage();
+      }
     }
   },
 };
@@ -528,6 +535,7 @@ export default {
       <ConversationMessageSuggestion
             :open="openSuggestion"
             :conversationId="currentChat.id"
+            ref="conversationMessageSuggestion"
       />
     </div>
     <div
