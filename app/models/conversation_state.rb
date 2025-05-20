@@ -11,7 +11,7 @@
 #  account_id  :integer
 #
 class ConversationState < ApplicationRecord
-    validates :name, presence: true, uniqueness: true
+    validates :name, presence: true, uniqueness: { scope: :account_id }
     validates :description, presence: true
     validates :color, presence: true
     validates :account_id, presence: true
