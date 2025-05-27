@@ -182,8 +182,10 @@ Rails.application.routes.draw do
           resources :agents_cloud, only: [] do
             collection do
               get :suggestion_message
+              get :analize_conversation_sentiment
             end
           end
+          resources :conversation_sentiments, only: [:index]
           resources :response_sources, only: [:create] do
             collection do
               post :parse

@@ -2,34 +2,37 @@
 #
 # Table name: conversations
 #
-#  id                     :integer          not null, primary key
-#  additional_attributes  :jsonb
-#  agent_last_seen_at     :datetime
-#  assignee_last_seen_at  :datetime
-#  cached_label_list      :text
-#  contact_last_seen_at   :datetime
-#  custom_attributes      :jsonb
-#  first_reply_created_at :datetime
-#  identifier             :string
-#  last_activity_at       :datetime         not null
-#  priority               :integer
-#  snoozed_until          :datetime
-#  status                 :integer          default("open"), not null
-#  uuid                   :uuid             not null
-#  waiting_since          :datetime
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#  account_id             :integer          not null
-#  assignee_id            :integer
-#  campaign_id            :bigint
-#  contact_id             :bigint
-#  contact_inbox_id       :bigint
-#  conversations_state_id :integer
-#  display_id             :integer          not null
-#  inbox_id               :integer          not null
-#  kanban_states_id       :integer
-#  sla_policy_id          :bigint
-#  team_id                :bigint
+#  id                        :integer          not null, primary key
+#  additional_attributes     :jsonb
+#  agent_last_seen_at        :datetime
+#  assignee_last_seen_at     :datetime
+#  cached_label_list         :text
+#  contact_last_seen_at      :datetime
+#  custom_attributes         :jsonb
+#  first_reply_created_at    :datetime
+#  identifier                :string
+#  justification             :text
+#  last_activity_at          :datetime         not null
+#  priority                  :integer
+#  score                     :float
+#  snoozed_until             :datetime
+#  status                    :integer          default("open"), not null
+#  uuid                      :uuid             not null
+#  waiting_since             :datetime
+#  created_at                :datetime         not null
+#  updated_at                :datetime         not null
+#  account_id                :integer          not null
+#  assignee_id               :integer
+#  campaign_id               :bigint
+#  contact_id                :bigint
+#  contact_inbox_id          :bigint
+#  conversation_sentiment_id :bigint
+#  conversations_state_id    :integer
+#  display_id                :integer          not null
+#  inbox_id                  :integer          not null
+#  kanban_states_id          :integer
+#  sla_policy_id             :bigint
+#  team_id                   :bigint
 #
 # Indexes
 #
@@ -98,6 +101,7 @@ class Conversation < ApplicationRecord
   belongs_to :team, optional: true
   belongs_to :campaign, optional: true
   belongs_to :conversation_state, optional: true, foreign_key: "conversations_state_id"
+  belongs_to :conversation_sentiment, optional: true, foreign_key: "conversation_sentiment_id"
   belongs_to :kanban_state, optional: true, foreign_key: "kanban_states_id"
 
   has_many :mentions, dependent: :destroy_async
