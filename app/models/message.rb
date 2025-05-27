@@ -140,6 +140,9 @@ class Message < ApplicationRecord
       message_type: message_type_before_type_cast,
       conversation_id: conversation.display_id,
       conversation: conversation_push_event_data,
+      score: conversation.score,
+      justification: conversation.justification,
+      conversation_sentiment_id: conversation.conversation_sentiment_id,
       conversations_state_name: conversation.conversation_state&.name,
       conversations_state: {
         name:conversation.conversation_state&.name,

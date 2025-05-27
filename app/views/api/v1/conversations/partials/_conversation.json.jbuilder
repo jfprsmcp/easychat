@@ -33,7 +33,10 @@ json.kanban_state do
     json.order nil
   end
 end
-json.conversations_state_name conversation.conversations_state_id ? ConversationState.where(id: conversation.conversations_state_id).pick(:name) : nil
+json.score conversation.score
+json.justification conversation.justification
+json.conversation_sentiment_id conversation.conversation_sentiment_id
+json.conversations_state_name conversation.conversation_state&.name
 json.conversations_state do 
   if conversation.conversations_state_id
     state = ConversationState.find(conversation.conversations_state_id)
