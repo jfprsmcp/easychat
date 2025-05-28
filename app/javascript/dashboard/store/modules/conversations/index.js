@@ -12,6 +12,7 @@ import wootConstants from 'dashboard/constants/globals';
 import boardConstants from 'dashboard/constants/board';
 import { BUS_EVENTS } from '../../../../shared/constants/busEvents';
 import { emitter } from 'shared/helpers/mitt';
+import { MESSAGE_TYPE } from '../../../../shared/constants/messages';
 
 const state = {
   allConversations: [],
@@ -315,6 +316,9 @@ export const mutations = {
       if (selectedChatId === conversationId) {
         emitter.emit(BUS_EVENTS.FETCH_LABEL_SUGGESTIONS);
         emitter.emit(BUS_EVENTS.SCROLL_TO_MESSAGE);
+        if (message.message_type === MESSAGE_TYPE.INCOMING) {
+          emitter.emit(BUS_EVENTS.MESSAGE_INCOMING);
+        }
       }
     }
   },
@@ -472,7 +476,7 @@ export const mutations = {
     if (!chat) {
       return
     }
-    Vue.set(chat, `${properties.key}`, properties.value);
+    Object.assign(chat, properties);
   },
 
   [types.UPDATE_PROPERTIES_CONVERSATION_BOARD](_state, { conversationId, columnId ,properties }) {
@@ -484,7 +488,7 @@ export const mutations = {
     if (!chat) {
       return
     }
-    Vue.set(chat, `${properties.key}`, properties.value);
+    Object.assign(chat, properties);
   },
 
   [types.MOVE_CONVERSATION_BOARD](_state, { kanbanState }) {

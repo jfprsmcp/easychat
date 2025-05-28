@@ -247,6 +247,7 @@ export default {
 
   created() {
     this.$emitter.on(BUS_EVENTS.SCROLL_TO_MESSAGE, this.onScrollToMessage);
+    this.$emitter.on(BUS_EVENTS.MESSAGE_INCOMING, this.onIncomingMessage);
     // when a new message comes in, we refetch the label suggestions
     this.$emitter.on(BUS_EVENTS.FETCH_LABEL_SUGGESTIONS, this.fetchSuggestions);
     // when a message is sent we set the flag to true this hides the label suggestions,
@@ -319,6 +320,7 @@ export default {
     },
     removeBusListeners() {
       this.$emitter.off(BUS_EVENTS.SCROLL_TO_MESSAGE, this.onScrollToMessage);
+      this.$emitter.off(BUS_EVENTS.MESSAGE_INCOMING, this.onIncomingMessage);
     },
     onScrollToMessage({ messageId = '' } = {}) {
       this.$nextTick(() => {
@@ -329,10 +331,12 @@ export default {
           this.fetchPreviousMessages();
         } else {
           this.scrollToBottom();
-          this.triggerClickFetchSuggestionMessage()
         }
       });
       this.makeMessagesRead();
+    },
+    onIncomingMessage() {
+      this.triggerClickFetchSuggestionMessage()
     },
     addScrollListener() {
       this.conversationPanel = this.$el.querySelector('.conversation-panel');
@@ -535,6 +539,7 @@ export default {
       <ConversationMessageSuggestion
             :open="openSuggestion"
             :conversationId="currentChat.id"
+            :chat="currentChat"
             ref="conversationMessageSuggestion"
       />
     </div>

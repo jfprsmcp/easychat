@@ -14,6 +14,14 @@ class AgentCloud extends ApiClient {
       }
     });
   }
+  getSentimentConversation({ conversation_display_id }) {
+    return axios.get(`${this.url}/analize_conversation_sentiment`, {
+      params: {
+        conversation_display_id,
+        account_id: this.accountIdFromRoute,
+      }
+    });
+  }
 }
 
 export default new AgentCloud();

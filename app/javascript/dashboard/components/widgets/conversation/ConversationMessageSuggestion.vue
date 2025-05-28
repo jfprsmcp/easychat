@@ -1,5 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
+import agentCloud from '../../../api/agentCloud';
+import conversationSentimentsApi from '../../../api/conversationSentimentsApi';
+
 export default {
     props: {
         open: {
@@ -9,14 +12,29 @@ export default {
         conversationId: {
             type: Number,
             required: true
+        },
+        chat: {
+            type: Object,
+            required: true
         }
     },
     data() {
         return {
-            loading: false,
+            sentiments: undefined,
+            satisfaction: {
+                score: 0,
+                category: "",
+                justification: "",
+                icon:""
+            },
+            loading: {
+                fetchSuggestion: false,
+                fetchSentiment: false
+            },
             indexMessageSelected: undefined,
             firstOpenConversatioSuggestion: true,
-            _fetchBlock: false
+            _lockSuggestion:false,
+            _lockSentiment:false
         }
     },
     computed: {
@@ -26,8 +44,16 @@ export default {
         failLoadSuggestionMessage(){
             return (
                 this.messages.length == 0 &&
-                !this.loading
+                !this.loading.fetchSuggestion
             )
+        },
+        messageSatisfaction() {
+            const { score, category, icon } = this.satisfaction;
+            return `🧠 Satisfacción: ${Number(score * 100).toFixed(0)}% (${category}${icon})`
+        },
+        hasConversationSentiment() {
+            const { conversation_sentiment_id } = this.chat;
+            return conversation_sentiment_id != null
         }
     },
     watch: {
@@ -41,14 +67,40 @@ export default {
                 this.firstOpenConversatioSuggestion = false
                 this.fetchSuggestionMessage()
             }
+        },
+        sentiments(value) {
+            if (!value || !Array.isArray(value)) {
+                return
+            }
+            if (this.hasConversationSentiment) {
+                const { conversation_sentiment_id, justification, score } = this.chat
+                let sentiment = this.sentiments.find((item) => item.id == conversation_sentiment_id)
+                if (!sentiment) {
+                    console.warn({
+                        error: "Sentiments not found to list",
+                        find: conversation_sentiment_id,
+                        list: this.sentiments
+                    })
+                    return
+                }
+                this.satisfaction = {
+                    ...this.satisfaction,
+                    justification,
+                    score,
+                    category: sentiment.name,
+                    icon: sentiment.icon
+                }
+                return
+            }
+            this.fetchConversationSentiment()
         }
     },
     methods: {
-        async syncronized(callback){
-            if(this._fetchBlock) return
-            this._fetchBlock = true
+        async syncronized(lockKey,callback){
+            if(this[lockKey]) return
+            this[lockKey] = true
             await callback()
-            this._fetchBlock = false
+            this[lockKey] = false
         },
         clearSuggestionMessage() {
             this.$store.dispatch('clearSuggestionMessage')
@@ -56,9 +108,9 @@ export default {
         fetchSuggestionMessage() {
             if (!this.open)
                 return
-            this.syncronized(async () => {
+            this.syncronized("_lockSuggestion", async () => {
                 try {
-                    this.loading = true
+                    this.loading.fetchSuggestion = true
                     this.clearSuggestionMessage()
                     await this.$store.dispatch('getSuggestionMessage', {
                         conversationId: this.conversationId,
@@ -67,7 +119,50 @@ export default {
                 } catch (error) {
                     console.warn({ error })
                 } finally {
-                    this.loading = false
+                    this.loading.fetchSuggestion = false
+                }
+            })
+        },
+        async fetchAgentSentiments() {
+            const response = await agentCloud.getSentimentConversation({
+                conversation_display_id: this.conversationId
+            })
+            if (!response.data.status) {
+                throw new Error(response)
+            }
+            return response.data.data
+        },
+        fetchConversationSentiment() {
+            this.syncronized("_lockSentiment", async () => {
+                try {
+                    this.loading.fetchSentiment = true
+                    const { categoria, puntaje, justificacion } = await this.fetchAgentSentiments()
+                    let sentiment = this.sentiments.find((item) => item.name == categoria)
+                    if (!sentiment) {
+                        console.warn({
+                            error: "Sentiments not found to list",
+                            find: categoria,
+                            list: this.sentiments
+                        })
+                        return
+                    }
+                    this.satisfaction = {
+                        ...this.satisfaction,
+                        justification: justificacion,
+                        score: puntaje,
+                        category: categoria,
+                        icon: sentiment.icon
+                    }
+                    this.$store.dispatch('fetchUpdateSentimentConversation', {
+                        conversationId: this.chat.id,
+                        score: this.satisfaction.score,
+                        justification: this.satisfaction.justification,
+                        conversation_sentiment_id: sentiment.id
+                    })
+                } catch (error) {
+                    console.warn({ error })
+                } finally {
+                    this.loading.fetchSentiment = false
                 }
             })
         },
@@ -85,35 +180,63 @@ export default {
             return {
                 'selected-message': true,
             }
+        },
+        async fetchListSentiments() {
+            try {
+                let res = await conversationSentimentsApi.get()
+                this.sentiments = res.data
+            } catch (error) {
+                console.warn({ error })
+            }
         }
+    },
+    mounted(){
+        this.fetchListSentiments();
     }
 }
 </script>
 <template>
     <div v-if="open" class="conversation-message-suggestion">
         <div class="flex items-center justify-between">
-            <h3>{{ $t('CONVERSATION.REPLYBOX.SUGGESTION.TITLE') }}</h3>
+            <template v-if="loading.fetchSentiment">
+                <span class="mx-auto mt-4 mb-4 spinner" />
+            </template>
+            <template v-else>
+                <h3 class="text-sm cursor-pointer">
+                    {{ messageSatisfaction }}
+                </h3>
+            </template>
             <woot-button 
                 variant="clear" 
                 color-scheme="secondary"
                 icon="loading" 
-                :disabled="loading"
+                :disabled="loading.fetchSentiment"
+                @click="fetchConversationSentiment" 
+            />
+        </div>
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm">{{ $t('CONVERSATION.REPLYBOX.SUGGESTION.TITLE')}}</h3>
+            <woot-button 
+                variant="clear" 
+                color-scheme="secondary"
+                icon="loading" 
+                :disabled="loading.fetchSuggestion"
                 @click="fetchSuggestionMessage" 
             />
         </div>
         <hr class="separator"/>
         <div class="flex flex-col gap-2">
-            <div v-if="loading" class="text-center">
+            <div v-if="loading.fetchSuggestion" class="text-center">
                 <span class="mt-4 mb-4 spinner" />
             </div>
             <div v-for="(message, index) in messages" :key="index"
-                class="bg-primary py-1 px-2 rounded-md cursor-pointer" 
+                class="bg-primary py-1 px-2 rounded-md cursor-pointer text-sm" 
                 @click="clickSelectedMessageSuggestion(message, index)"
                 :class="classActiveSuggestionMessage(index)"
                 >
                 <small>{{ message }}</small>
             </div>
-            <div v-if="failLoadSuggestionMessage" class="text-center mt-2">
+            <div v-if="failLoadSuggestionMessage" class="text-center mt-2 text-sm">
                 <small>No se pudo cargar mensajes</small>
             </div>
         </div>

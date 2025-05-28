@@ -537,6 +537,7 @@ export default {
           :open="openSuggestion"
           :conversationId="currentChat.id"
           ref="conversationMessageSuggestion"
+          :chat="currentChat"
         />
     </div>
     <div

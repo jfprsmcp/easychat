@@ -160,7 +160,10 @@
       "PRIVATE_NOTE": "Private Note",
        "SUGGESTION": {
         "BTN": "AI Assistant 💡",
-        "TITLE": "Suggested answer 💡"
+        "TITLE": "💡 Suggested answer"
+      },
+      "SENTIMENT": {
+        "TITLE": "🧠 Satisfaction: 50% (Neutral 😐)"
       },
       "SEND": "Send",
       "CREATE": "Add Note",

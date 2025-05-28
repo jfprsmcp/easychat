@@ -160,15 +160,18 @@ const actions = {
         conversationId,
         columnId: kanbanState.id,
         properties: {
-          key: "kanban_state",
-          value: kanbanState
+          kanban_state: kanbanState
         }
       });
     } catch (error) {
       throw error;
     }
   },
-
+  fetchUpdateSentimentConversation: async ({ commit, state, dispatch }, payload) => {
+    const { conversationId, ...attributes } = payload
+    await ConversationApi.update({ conversationId, attributes })
+    commit(types.UPDATE_PROPERTIES_CONVERSATION, { conversationId, properties: attributes })
+  },
   updatePropertiesConversation({ commit, state, dispatch }, payload) {
     try {
       commit(getTypeList(types.UPDATE_PROPERTIES_CONVERSATION), payload)
