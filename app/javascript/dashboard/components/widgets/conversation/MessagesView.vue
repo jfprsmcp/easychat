@@ -247,7 +247,6 @@ export default {
 
   created() {
     this.$emitter.on(BUS_EVENTS.SCROLL_TO_MESSAGE, this.onScrollToMessage);
-    this.$emitter.on(BUS_EVENTS.MESSAGE_INCOMING, this.onIncomingMessage);
     // when a new message comes in, we refetch the label suggestions
     this.$emitter.on(BUS_EVENTS.FETCH_LABEL_SUGGESTIONS, this.fetchSuggestions);
     // when a message is sent we set the flag to true this hides the label suggestions,
@@ -320,7 +319,6 @@ export default {
     },
     removeBusListeners() {
       this.$emitter.off(BUS_EVENTS.SCROLL_TO_MESSAGE, this.onScrollToMessage);
-      this.$emitter.off(BUS_EVENTS.MESSAGE_INCOMING, this.onIncomingMessage);
     },
     onScrollToMessage({ messageId = '' } = {}) {
       this.$nextTick(() => {
@@ -334,9 +332,6 @@ export default {
         }
       });
       this.makeMessagesRead();
-    },
-    onIncomingMessage() {
-      this.triggerClickFetchSuggestionMessage()
     },
     addScrollListener() {
       this.conversationPanel = this.$el.querySelector('.conversation-panel');
@@ -450,12 +445,6 @@ export default {
     },
     clickSuggestion(value) {
       this.openSuggestion = value
-    },
-    triggerClickFetchSuggestionMessage() {
-      const childComponent = this.$refs.conversationMessageSuggestion;
-      if (childComponent && typeof childComponent.fetchSuggestionMessage === 'function') {
-        childComponent.fetchSuggestionMessage();
-      }
     }
   },
 };

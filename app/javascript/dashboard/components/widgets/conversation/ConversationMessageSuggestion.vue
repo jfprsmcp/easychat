@@ -2,6 +2,11 @@
 import { mapGetters } from 'vuex';
 import agentCloud from '../../../api/agentCloud';
 import conversationSentimentsApi from '../../../api/conversationSentimentsApi';
+import { MESSAGE_TYPE } from '../../../../shared/constants/messages';
+import { BUS_EVENTS } from '../../../../shared/constants/busEvents';
+
+const MAX_MESSAGE_EVALUATE = 100
+const OVERRIDE_LIMIT_MESSAGE_INCOMMING = 3
 
 export default {
     props: {
@@ -66,33 +71,11 @@ export default {
             if (this.firstOpenConversatioSuggestion) {
                 this.firstOpenConversatioSuggestion = false
                 this.fetchSuggestionMessage()
+                this.analyzeSentimentConversation({ optionSentiments: this.sentiments })
             }
         },
         sentiments(value) {
-            if (!value || !Array.isArray(value)) {
-                return
-            }
-            if (this.hasConversationSentiment) {
-                const { conversation_sentiment_id, justification, score } = this.chat
-                let sentiment = this.sentiments.find((item) => item.id == conversation_sentiment_id)
-                if (!sentiment) {
-                    console.warn({
-                        error: "Sentiments not found to list",
-                        find: conversation_sentiment_id,
-                        list: this.sentiments
-                    })
-                    return
-                }
-                this.satisfaction = {
-                    ...this.satisfaction,
-                    justification,
-                    score,
-                    category: sentiment.name,
-                    icon: sentiment.icon
-                }
-                return
-            }
-            this.fetchConversationSentiment()
+            this.analyzeSentimentConversation({ optionSentiments: value })
         }
     },
     methods: {
@@ -157,7 +140,8 @@ export default {
                         conversationId: this.chat.id,
                         score: this.satisfaction.score,
                         justification: this.satisfaction.justification,
-                        conversation_sentiment_id: sentiment.id
+                        conversation_sentiment_id: sentiment.id,
+                        last_sentiment_analysis: true
                     })
                 } catch (error) {
                     console.warn({ error })
@@ -188,9 +172,72 @@ export default {
             } catch (error) {
                 console.warn({ error })
             }
+        },
+        overrideLimitMessageIncomming() {
+            const { messages, last_sentiment_analysis } = this.chat
+            if (!last_sentiment_analysis)
+                return true
+            let date_last_sentiment_analysis = new Date(last_sentiment_analysis * 1000);
+            let length_message = messages.length;
+            let messages_evaluate = 0
+            let count_message_incoming = 0
+            for (let i = (length_message - 1); i >= 0; i--) {
+                if (messages_evaluate >= MAX_MESSAGE_EVALUATE)
+                    return false
+                messages_evaluate++;
+                if (
+                    messages[i].message_type === MESSAGE_TYPE.INCOMING &&
+                    new Date(messages[i].created_at * 1000) > date_last_sentiment_analysis
+                ) {
+                    count_message_incoming++;
+                }
+                if (count_message_incoming >= OVERRIDE_LIMIT_MESSAGE_INCOMMING)
+                    return true
+            }
+            return false
+        },
+        captureSentimentConversation(optionSentiments) {
+            const { conversation_sentiment_id, justification, score } = this.chat
+            let sentiment = optionSentiments.find((item) => item.id == conversation_sentiment_id)
+            if (!sentiment) {
+                console.warn({
+                    error: "Sentiments not found to list",
+                    find: conversation_sentiment_id,
+                    list: optionSentiments
+                })
+                return
+            }
+            this.satisfaction = {
+                ...this.satisfaction,
+                justification,
+                score,
+                category: sentiment.name,
+                icon: sentiment.icon
+            }
+        },
+        analyzeSentimentConversation({ optionSentiments }) {
+            if (!optionSentiments || !Array.isArray(optionSentiments)) {
+                return
+            }
+            if (this.hasConversationSentiment && !this.overrideLimitMessageIncomming()) {
+                this.captureSentimentConversation(optionSentiments)
+                return
+            }
+            this.fetchConversationSentiment()
+        },
+        onMessageIncomig() {
+            if(!this.open) return
+            this.fetchSuggestionMessage()
+            this.analyzeSentimentConversation({ optionSentiments: this.sentiments })
         }
     },
-    mounted(){
+    created() {
+        this.$emitter.on(BUS_EVENTS.MESSAGE_INCOMING, this.onMessageIncomig);
+    },
+    beforeDestroy() {
+        this.$emitter.off(BUS_EVENTS.MESSAGE_INCOMING, this.onMessageIncomig)
+    },
+    mounted() {
         this.fetchListSentiments();
     }
 }

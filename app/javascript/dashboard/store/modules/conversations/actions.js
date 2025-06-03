@@ -168,9 +168,15 @@ const actions = {
     }
   },
   fetchUpdateSentimentConversation: async ({ commit, state, dispatch }, payload) => {
-    const { conversationId, ...attributes } = payload
-    await ConversationApi.update({ conversationId, attributes })
-    commit(types.UPDATE_PROPERTIES_CONVERSATION, { conversationId, properties: attributes })
+    const { conversationId, last_sentiment_analysis, ...attributes } = payload
+    const { data } = await ConversationApi.update({ conversationId, attributes: { ...attributes, last_sentiment_analysis } })
+    commit(types.UPDATE_PROPERTIES_CONVERSATION, {
+      conversationId,
+      properties: {
+        ...attributes,
+        last_sentiment_analysis: data.last_sentiment_analysis
+      }
+    })
   },
   updatePropertiesConversation({ commit, state, dispatch }, payload) {
     try {
