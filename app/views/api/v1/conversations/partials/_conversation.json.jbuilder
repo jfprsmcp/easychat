@@ -36,6 +36,7 @@ end
 json.score conversation.score
 json.justification conversation.justification
 json.conversation_sentiment_id conversation.conversation_sentiment_id
+json.last_sentiment_analysis conversation.last_sentiment_analysis.to_i
 json.conversations_state_name conversation.conversation_state&.name
 json.conversations_state do 
   if conversation.conversations_state_id

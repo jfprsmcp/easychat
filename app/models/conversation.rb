@@ -13,6 +13,7 @@
 #  identifier                :string
 #  justification             :text
 #  last_activity_at          :datetime         not null
+#  last_sentiment_analysis   :datetime
 #  priority                  :integer
 #  score                     :float
 #  snoozed_until             :datetime

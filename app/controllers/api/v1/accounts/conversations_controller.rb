@@ -38,6 +38,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
 
   def update
     params[:kanban_states_id] = nil if params[:kanban_states_id] == 'null'
+    params[:last_sentiment_analysis] = Time.current if params[:last_sentiment_analysis]
     @conversation.update!(permitted_update_params)
   end
 
@@ -121,7 +122,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
 
   def permitted_update_params
     # TODO: Move the other conversation attributes to this method and remove specific endpoints for each attribute
-    params.permit(:priority,:kanban_states_id,:score,:justification,:conversation_sentiment_id)
+    params.permit(:priority,:kanban_states_id,:score,:justification,:conversation_sentiment_id,:last_sentiment_analysis)
   end
 
   def update_last_seen_on_conversation(last_seen_at, update_assignee)
