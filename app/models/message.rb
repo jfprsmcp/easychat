@@ -140,9 +140,6 @@ class Message < ApplicationRecord
       message_type: message_type_before_type_cast,
       conversation_id: conversation.display_id,
       conversation: conversation_push_event_data,
-      score: conversation.score,
-      justification: conversation.justification,
-      conversation_sentiment_id: conversation.conversation_sentiment_id,
       conversations_state_name: conversation.conversation_state&.name,
       conversations_state: {
         name:conversation.conversation_state&.name,
@@ -187,6 +184,7 @@ class Message < ApplicationRecord
       content_attributes: content_attributes,
       content_type: content_type,
       content: content,
+      active_agent_bot: conversation.active_agent_bot,
       conversation: conversation.webhook_data,
       created_at: created_at,
       id: id,

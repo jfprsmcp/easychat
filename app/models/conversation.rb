@@ -3,6 +3,7 @@
 # Table name: conversations
 #
 #  id                        :integer          not null, primary key
+#  active_agent_bot          :boolean          default(TRUE), not null
 #  additional_attributes     :jsonb
 #  agent_last_seen_at        :datetime
 #  assignee_last_seen_at     :datetime
