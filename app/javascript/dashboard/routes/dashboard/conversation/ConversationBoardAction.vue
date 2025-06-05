@@ -9,12 +9,14 @@ import agentMixin from 'dashboard/mixins/agentMixin';
 import { CONVERSATION_PRIORITY } from '../../../../shared/constants/messages';
 import { CONVERSATION_EVENTS } from '../../../helper/AnalyticsHelper/events';
 import boardConstants from 'dashboard/constants/board';
+import SwitchButton from "dashboard/components/ui/Switch.vue";
 
 export default {
   components: {
     ContactDetailsItem,
     MultiselectDropdown,
     ConversationLabels,
+    SwitchButton
   },
   mixins: [agentMixin],
   props: {
@@ -60,6 +62,7 @@ export default {
           thumbnail: `/assets/images/dashboard/priority/${CONVERSATION_PRIORITY.LOW}.svg`,
         },
       ],
+      valueAgentBot: null
     };
   },
   computed: {
@@ -183,6 +186,11 @@ export default {
       return false;
     },
   },
+  watch: {
+    conversationId() {
+      this.valueAgentBot = this.currentChat.active_agent_bot
+    }
+  },
   methods: {
     onSelfAssign() {
       const {
@@ -271,13 +279,43 @@ export default {
         columnIdDecrement,
         value: 1
       })
+    },
+    onSwitchAgentBot(value) {
+      this.valueAgentBot = value
+      try {
+        this.$store.dispatch('fetchUpdateAgentBot', {
+          conversationId: this.currentChat.id,
+          active_agent_bot: value
+        });
+        useAlert(this.$t('CONVERSATION.UPDATE.AGENT_ACTIVE_BOT'));
+      } catch (error) {
+        this.valueAgentBot = !value
+        console.warn({ error })
+      }
     }
   },
+  mounted() {
+    this.valueAgentBot = this.currentChat.active_agent_bot
+  }
 };
 </script>
 
 <template>
   <div class="bg-white dark:bg-slate-900">
+     <div class="multiselect-wrap--small flex justify-between items-center mb-3">
+      <span class="text-sm font-medium text-slate-800 dark:text-slate-100">
+        {{ $t('CONVERSATION_SIDEBAR.ACTIVE_AGENT_IA') }}
+      </span>
+      <template v-if="valueAgentBot==null">
+        <span class="mx-auto mt-4 mb-4 spinner" />
+      </template>
+      <template v-else>
+        <SwitchButton
+          :value="valueAgentBot"
+          @input="onSwitchAgentBot"
+        />
+      </template>
+    </div>
     <div class="multiselect-wrap--small">
       <ContactDetailsItem
         compact

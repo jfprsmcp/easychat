@@ -167,6 +167,16 @@ const actions = {
       throw error;
     }
   },
+  fetchUpdateAgentBot: async ({ commit, state, dispatch }, payload) => {
+    const { conversationId, ...attributes } = payload
+    await ConversationApi.update({ conversationId, attributes })
+    commit(getTypeList(types.UPDATE_PROPERTIES_CONVERSATION), {
+      conversationId,
+      properties: {
+        ...attributes,
+      }
+    })
+  },
   fetchUpdateSentimentConversation: async ({ commit, state, dispatch }, payload) => {
     const { conversationId, last_sentiment_analysis, ...attributes } = payload
     const { data } = await ConversationApi.update({ conversationId, attributes: { ...attributes, last_sentiment_analysis } })
