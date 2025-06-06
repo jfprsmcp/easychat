@@ -280,16 +280,17 @@ export default {
         value: 1
       })
     },
-    onSwitchAgentBot(value) {
+    async onSwitchAgentBot(value) {
       this.valueAgentBot = value
       try {
-        this.$store.dispatch('fetchUpdateAgentBot', {
+        await this.$store.dispatch('fetchUpdateAgentBot', {
           conversationId: this.currentChat.id,
           active_agent_bot: value
         });
-        useAlert(this.$t('CONVERSATION.UPDATE.AGENT_ACTIVE_BOT'));
+       useAlert(this.$t('CONVERSATION.UPDATE.AGENT_ACTIVE_BOT.SUCCESS'));
       } catch (error) {
         this.valueAgentBot = !value
+        useAlert(this.$t('CONVERSATION.UPDATE.AGENT_ACTIVE_BOT.FALIED'));
         console.warn({ error })
       }
     }

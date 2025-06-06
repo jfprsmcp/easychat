@@ -1,7 +1,10 @@
 {
   "CONVERSATION": {
     "UPDATE": {
-      "AGENT_ACTIVE_BOT": "Se actualizo el estado del agente ia"
+      "AGENT_ACTIVE_BOT": {
+        "SUCCESS":"Se actualizo el estado del agente ia",
+        "FALIED":"No se pudo actualizar el estado del agente ia"
+      }
     },
     "SELECT_A_CONVERSATION": "Por favor, selecciona una conversación del panel izquierdo",
     "CSAT_REPLY_MESSAGE": "Por favor, valora la conversación",
@@ -283,7 +286,7 @@
     }
   },
   "CONVERSATION_SIDEBAR": {
-    "ACTIVE_AGENT_IA": "Estado agente ia",
+    "ACTIVE_AGENT_IA": "Estado Agente IA",
     "ASSIGNEE_LABEL": "Agente asignado",
     "SELF_ASSIGN": "Asignar a mi",
     "TEAM_LABEL": "Equipo asignado",
