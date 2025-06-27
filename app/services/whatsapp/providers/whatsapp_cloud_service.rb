@@ -127,11 +127,22 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
         policy: 'deterministic',
         code: template_info[:lang_code]
       },
-      components: [{
-        type: 'body',
-        parameters: template_info[:parameters]
-      }]
+      components: template_component( template_info[:header], template_info[:parameters] )
     }
+  end
+
+  def template_component(header, parameters)
+    components = [{ type: 'body', parameters: parameters }]
+    return components unless header.present?
+    format_type = header["format"].downcase
+    components << {
+        type: "header",
+        parameters: [{ 
+          type: format_type, 
+          format_type.to_sym => { link: header["url"] } 
+        }]
+    }
+    components
   end
 
   def whatsapp_reply_context(message)
