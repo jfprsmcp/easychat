@@ -18,6 +18,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    showButtonAction: {
+      type: Boolean,
+      default: true,
+    }
   },
   setup(props, { emit }) {
     const processVariable = str => {
@@ -30,6 +34,13 @@ export default {
     };
 
     const processedParams = ref({});
+    const file = ref("");
+    
+    const includeHeader = computed(() => {
+      return props.template.components.find(
+        component => component.type === 'HEADER'
+      )
+    })
 
     const templateString = computed(() => {
       return props.template.components.find(
@@ -50,12 +61,15 @@ export default {
 
     const v$ = useVuelidate(
       {
+        file: {
+          required: requiredIf(includeHeader)
+        },
         processedParams: {
           requiredIfKeysPresent: requiredIf(variables),
           allKeysRequired,
         },
       },
-      { processedParams }
+      { processedParams, file }
     );
 
     const generateVariables = () => {
@@ -73,21 +87,34 @@ export default {
       emit('resetTemplate');
     };
 
-    const sendMessage = () => {
+    const validateParams = () => {
       v$.value.$touch();
-      if (v$.value.$invalid) return;
+      return !v$.value.$invalid
+    }
 
-      const payload = {
+    const getTemplateMessage = () => {
+      let template = {
         message: processedString.value,
         templateParams: {
           name: props.template.name,
           category: props.template.category,
           language: props.template.language,
           namespace: props.template.namespace,
-          processed_params: processedParams.value,
+          processed_params: processedParams.value
         },
       };
-      emit('sendMessage', payload);
+      if (includeHeader.value) {
+        template.templateParams.header = {
+          url: file.value,
+          format: includeHeader.value.format
+        }
+      }
+      return template
+    }
+
+    const sendMessage = () => {
+      if (!validateParams) return
+      emit('sendMessage', getTemplateMessage());
     };
 
     onMounted(generateVariables);
@@ -100,19 +127,47 @@ export default {
       v$,
       resetTemplate,
       sendMessage,
+      getTemplateMessage,
+      validateParams,
+      includeHeader,
+      file
     };
   },
 };
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full relative">
+    <span
+      v-if="!showButtonAction"
+      class="absolute z-10 cursor-pointer"
+      style="top: -30px; right: 0px;"
+      @click="resetTemplate"
+    >✖</span>
     <textarea
       v-model="processedString"
       rows="4"
       readonly
-      class="template-input"
+      class="template-input mt-2"
     />
+    <div v-if="includeHeader" class="template__variables-container">
+      <p class="variables-label">
+        {{ $t('WHATSAPP_TEMPLATES.PARSER.HEADER_FILE') }}
+      </p>
+      <div
+        class="template__variable-item"
+      >
+        <span class="variable-label">
+          {{includeHeader.format.toLowerCase()}}
+        </span>
+        <woot-input
+          v-model="file"
+          type="text"
+          class="variable-input"
+          :styles="{ marginBottom: 0 }"
+        />
+      </div>
+    </div>
     <div v-if="variables" class="template__variables-container">
       <p class="variables-label">
         {{ $t('WHATSAPP_TEMPLATES.PARSER.VARIABLES_LABEL') }}
@@ -136,7 +191,7 @@ export default {
         {{ $t('WHATSAPP_TEMPLATES.PARSER.FORM_ERROR_MESSAGE') }}
       </p>
     </div>
-    <footer>
+    <footer v-if="showButtonAction">
       <woot-button variant="smooth" @click="resetTemplate">
         {{ $t('WHATSAPP_TEMPLATES.PARSER.GO_BACK_LABEL') }}
       </woot-button>

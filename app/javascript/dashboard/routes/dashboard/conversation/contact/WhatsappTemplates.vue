@@ -11,6 +11,10 @@ export default {
       type: Number,
       default: undefined,
     },
+    showButtonAction: {
+      type: Boolean,
+      default: true,
+    }
   },
   data() {
     return {
@@ -18,6 +22,14 @@ export default {
     };
   },
   methods: {
+    validateTemplate() {
+      return this.$nextTick().then(() => {
+        return this.$refs.templateParser?.validateParams() ?? false;
+      })
+    },
+    getTemplateMessage() {
+      return this.$refs.templateParser.getTemplateMessage()
+    },
     pickTemplate(template) {
       this.$emit('pickTemplate', true);
       this.selectedWaTemplate = template;
@@ -45,7 +57,9 @@ export default {
     />
     <TemplateParser
       v-else
+      ref="templateParser"
       :template="selectedWaTemplate"
+      :showButtonAction="showButtonAction"
       @resetTemplate="onResetTemplate"
       @sendMessage="onSendMessage"
     />

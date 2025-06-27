@@ -8,21 +8,28 @@ import campaignMixin from 'shared/mixins/campaignMixin';
 import WootDateTimePicker from 'dashboard/components/ui/DateTimePicker.vue';
 import { URLPattern } from 'urlpattern-polyfill';
 import { CAMPAIGNS_EVENTS } from '../../../../helper/AnalyticsHelper/events';
-
+import { INBOX_TYPES } from 'shared/mixins/inboxMixin';
+import WhatsappTemplates from '../../conversation/contact/WhatsappTemplates.vue';
 export default {
   components: {
     WootDateTimePicker,
     WootMessageEditor,
+    WhatsappTemplates
   },
   mixins: [campaignMixin],
   setup() {
     return { v$: useVuelidate() };
   },
   data() {
+    const listDesign = {
+      DEFAULT: "DEFAULT",
+      WHATSAPP: "WHATSAPP"
+    };
     return {
       title: '',
       message: '',
-      selectedSender: 0,
+      additional_attributes: {},
+      selectedSender: undefined,
       selectedInbox: null,
       endPoint: '',
       timeOnPage: 10,
@@ -32,6 +39,9 @@ export default {
       scheduledAt: null,
       selectedAudience: [],
       senderList: [],
+      listDesign,
+      design: listDesign.DEFAULT,
+      template: undefined
     };
   },
 
@@ -46,13 +56,13 @@ export default {
       selectedInbox: {
         required,
       },
+      selectedSender: {
+          required,
+       },
     };
     if (this.isOngoingType) {
       return {
         ...commonValidations,
-        selectedSender: {
-          required,
-        },
         endPoint: {
           required,
           shouldBeAValidURLPattern(value) {
@@ -80,6 +90,9 @@ export default {
     }
     return {
       ...commonValidations,
+      scheduledAt: {
+        required
+      },
       selectedAudience: {
         isEmpty() {
           return !!this.selectedAudience.length;
@@ -96,22 +109,39 @@ export default {
       if (this.isOngoingType) {
         return this.$store.getters['inboxes/getWebsiteInboxes'];
       }
-      return this.$store.getters['inboxes/getSMSInboxes'];
+      return this.$store.getters['inboxes/getEnabledInboxes'];
     },
     sendersAndBotList() {
+      if (this.isOngoingType) {
+        return [
+          {
+            id: 0,
+            name: 'Bot',
+          },
+          ...this.senderList,
+        ];
+      }
       return [
-        {
-          id: 0,
-          name: 'Bot',
-        },
         ...this.senderList,
       ];
     },
+    isEnabledSelectedSender() {
+      let selectedInbox = this.inboxes.find((inbox) => inbox.id == this.selectedInbox)
+      if (!selectedInbox) return false
+      const enabledTypes = [INBOX_TYPES.WHATSAPP]
+      return enabledTypes.includes(selectedInbox.channel_type)
+    }
+  },
+  watch: {
+    sendersAndBotList(value) {
+      this.setSender(value)
+    }
   },
   mounted() {
     this.$track(CAMPAIGNS_EVENTS.OPEN_NEW_CAMPAIGN_MODAL, {
       type: this.campaignType,
     });
+    this.setSender(this.sendersAndBotList)
   },
   methods: {
     onClose() {
@@ -121,19 +151,8 @@ export default {
       this.scheduledAt = value;
     },
     async onChangeInbox() {
-      try {
-        const response = await this.$store.dispatch('inboxMembers/get', {
-          inboxId: this.selectedInbox,
-        });
-        const {
-          data: { payload: inboxMembers },
-        } = response;
-        this.senderList = inboxMembers;
-      } catch (error) {
-        const errorMessage =
-          error?.response?.message || this.$t('CAMPAIGN.ADD.API.ERROR_MESSAGE');
-        useAlert(errorMessage);
-      }
+      this.loadSenderList()
+      this.adaptDesignForm()
     },
     getCampaignDetails() {
       let campaignDetails = null;
@@ -162,18 +181,18 @@ export default {
         campaignDetails = {
           title: this.title,
           message: this.message,
+          sender_id: this.selectedSender || null,
           inbox_id: this.selectedInbox,
           scheduled_at: this.scheduledAt,
           audience,
+          additional_attributes: this.getAdditionalAttributes(this.selectedInbox)
         };
       }
       return campaignDetails;
     },
     async addCampaign() {
-      this.v$.$touch();
-      if (this.v$.$invalid) {
-        return;
-      }
+      if (!this.validateForm())
+        return
       try {
         const campaignDetails = this.getCampaignDetails();
         await this.$store.dispatch('campaigns/create', campaignDetails);
@@ -182,7 +201,7 @@ export default {
         this.$track(CAMPAIGNS_EVENTS.CREATE_CAMPAIGN, {
           type: this.campaignType,
         });
-
+        this.message = ""
         useAlert(this.$t('CAMPAIGN.ADD.API.SUCCESS_MESSAGE'));
         this.onClose();
       } catch (error) {
@@ -191,6 +210,80 @@ export default {
         useAlert(errorMessage);
       }
     },
+    validateForm() {
+      let subFormValidate
+      switch (this.design) {
+        case this.listDesign.WHATSAPP:
+          subFormValidate = this.validateTemplateWhatsapp()
+          break
+        default:
+          break
+      }
+      this.v$.$touch();
+      return subFormValidate && !this.v$.$invalid
+    },
+    validateTemplateWhatsapp() {
+      const whatsappCmp = this.$refs.whatsappTemplate;
+      if (!whatsappCmp.validateTemplate()) return false;
+      this.template = whatsappCmp.getTemplateMessage();
+      this.message = this.template.message;
+      return true;
+    },
+    async loadSenderList() {
+      try {
+        const response = await this.$store.dispatch('inboxMembers/get', {
+          inboxId: this.selectedInbox,
+        });
+        const {
+          data: { payload: inboxMembers },
+        } = response;
+        this.senderList = inboxMembers;
+      } catch (error) {
+        const errorMessage =
+          error?.response?.message || this.$t('CAMPAIGN.ADD.API.ERROR_MESSAGE');
+        useAlert(errorMessage);
+      }
+    },
+    getAdditionalAttributes(inboxId) {
+      let selectedInbox = this.inboxes.find((inbox) => inbox.id == inboxId)
+      if (!selectedInbox) {
+        return {}
+      }
+      if (selectedInbox.channel_type == INBOX_TYPES.WHATSAPP) {
+        const { templateParams } = this.template
+        let template = {
+          template_params: {
+            name: templateParams.name,
+            category: templateParams.category,
+            language: templateParams.language,
+            processed_params: templateParams.processed_params
+          }
+        }
+        if (templateParams.header) {
+          template.template_params.header = templateParams.header
+        }
+        return template
+      }
+      return {}
+    },
+    adaptDesignForm() {
+      let selectedInbox = this.inboxes.find((inbox) => inbox.id == this.selectedInbox)
+      if (!selectedInbox) {
+        this.design = this.listDesign.DEFAULT
+        return
+      }
+      if (selectedInbox.channel_type == INBOX_TYPES.WHATSAPP) {
+        this.design = this.listDesign.WHATSAPP
+        return
+      }
+       this.design = this.listDesign.DEFAULT
+    },
+    setSender(list){
+      if (!Array.isArray(list) || list.length == 0) {
+        return
+      }
+      this.selectedSender = list[0].id
+    }
   },
 };
 </script>
@@ -213,38 +306,6 @@ export default {
           @blur="v$.title.$touch"
         />
 
-        <div v-if="isOngoingType" class="editor-wrap">
-          <label>
-            {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.LABEL') }}
-          </label>
-          <div>
-            <WootMessageEditor
-              v-model="message"
-              class="message-editor"
-              :class="{ editor_warning: v$.message.$error }"
-              :placeholder="$t('CAMPAIGN.ADD.FORM.MESSAGE.PLACEHOLDER')"
-              @blur="v$.message.$touch"
-            />
-            <span v-if="v$.message.$error" class="editor-warning__message">
-              {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.ERROR') }}
-            </span>
-          </div>
-        </div>
-
-        <label v-else :class="{ error: v$.message.$error }">
-          {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.LABEL') }}
-          <textarea
-            v-model="message"
-            rows="5"
-            type="text"
-            :placeholder="$t('CAMPAIGN.ADD.FORM.MESSAGE.PLACEHOLDER')"
-            @blur="v$.message.$touch"
-          />
-          <span v-if="v$.message.$error" class="message">
-            {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.ERROR') }}
-          </span>
-        </label>
-
         <label :class="{ error: v$.selectedInbox.$error }">
           {{ $t('CAMPAIGN.ADD.FORM.INBOX.LABEL') }}
           <select v-model="selectedInbox" @change="onChangeInbox($event)">
@@ -256,6 +317,48 @@ export default {
             {{ $t('CAMPAIGN.ADD.FORM.INBOX.ERROR') }}
           </span>
         </label>
+        
+        <template v-if="design==listDesign.WHATSAPP">
+          <label>Templates whatssap</label>
+          <WhatsappTemplates
+            ref="whatsappTemplate"
+            :inbox-id="selectedInbox"
+            :showButtonAction="false"
+          />
+        </template>
+        <template v-else>
+          <div v-if="isOngoingType" class="editor-wrap">
+            <label>
+              {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.LABEL') }}
+            </label>
+            <div>
+              <WootMessageEditor
+                v-model="message"
+                class="message-editor"
+                :class="{ editor_warning: v$.message.$error }"
+                :placeholder="$t('CAMPAIGN.ADD.FORM.MESSAGE.PLACEHOLDER')"
+                @blur="v$.message.$touch"
+              />
+              <span v-if="v$.message.$error" class="editor-warning__message">
+                {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.ERROR') }}
+              </span>
+            </div>
+          </div>
+
+          <label v-else :class="{ error: v$.message.$error }">
+            {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.LABEL') }}
+            <textarea
+              v-model="message"
+              rows="5"
+              type="text"
+              :placeholder="$t('CAMPAIGN.ADD.FORM.MESSAGE.PLACEHOLDER')"
+              @blur="v$.message.$touch"
+            />
+            <span v-if="v$.message.$error" class="message">
+              {{ $t('CAMPAIGN.ADD.FORM.MESSAGE.ERROR') }}
+            </span>
+          </label>
+        </template>
 
         <label
           v-if="isOneOffType"
@@ -285,7 +388,7 @@ export default {
         </label>
 
         <label
-          v-if="isOngoingType"
+          v-if="isOngoingType || isEnabledSelectedSender"
           :class="{ error: v$.selectedSender.$error }"
         >
           {{ $t('CAMPAIGN.ADD.FORM.SENT_BY.LABEL') }}
@@ -303,7 +406,7 @@ export default {
           </span>
         </label>
 
-        <label v-if="isOneOffType">
+        <label v-if="isOneOffType"  :class="{ error: v$.scheduledAt.$error }">
           {{ $t('CAMPAIGN.ADD.FORM.SCHEDULED_AT.LABEL') }}
           <WootDateTimePicker
             :value="scheduledAt"
@@ -311,6 +414,9 @@ export default {
             :placeholder="$t('CAMPAIGN.ADD.FORM.SCHEDULED_AT.PLACEHOLDER')"
             @change="onChange"
           />
+          <span v-if="v$.scheduledAt.$error" class="message">
+            {{ $t('CAMPAIGN.ADD.FORM.SCHEDULED_AT.ERROR') }}
+          </span>
         </label>
 
         <woot-input

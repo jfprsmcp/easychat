@@ -16,6 +16,7 @@
         },
         "PARSER": {
             "VARIABLES_LABEL": "Variables",
+            "HEADER_FILE": "Archivo",
             "VARIABLE_PLACEHOLDER": "Introduzca el valor de %{variable}",
             "GO_BACK_LABEL": "Volver",
             "SEND_MESSAGE_LABEL": "Enviar mensaje",

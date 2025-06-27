@@ -1,6 +1,6 @@
 <script>
 // TODO: Remove this when we support all formats
-const formatsToRemove = ['DOCUMENT', 'IMAGE', 'VIDEO'];
+const formatsToRemove = ['DOCUMENT', 'VIDEO'];
 
 export default {
   props: {

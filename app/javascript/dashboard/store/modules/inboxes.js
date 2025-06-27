@@ -68,7 +68,7 @@ export const getters = {
     if (messagesTemplates instanceof Array) {
       return messagesTemplates.filter(template => {
         return !template.components.some(
-          i => i.format === 'IMAGE' || i.format === 'VIDEO'
+          i => i.format === 'VIDEO'
         );
       });
     }
@@ -115,6 +115,13 @@ export const getters = {
       item => item.channel_type !== INBOX_TYPES.EMAIL
     );
   },
+  getEnabledInboxes($state) {
+    const enabledTypes = [INBOX_TYPES.WHATSAPP, INBOX_TYPES.SMS];
+    return $state.records.filter(item =>
+      enabledTypes.includes(item.channel_type) ||
+      (item.channel_type == INBOX_TYPES.TWILIO && item.medium === 'sms')
+    );
+  }
 };
 
 const sendAnalyticsEvent = channelType => {
