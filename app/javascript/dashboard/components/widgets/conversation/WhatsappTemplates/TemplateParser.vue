@@ -11,6 +11,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { requiredIf } from '@vuelidate/validators';
+import { watch } from 'vue';
+import FileUpload from 'vue-upload-component';
+import MultiselectDropdown from 'shared/components/ui/MultiselectDropdown.vue';
+import { uploadFile } from '../../../../helper/uploadHelper';
+import { useAccount } from 'dashboard/composables/useAccount';
 
 export default {
   props: {
@@ -23,10 +28,15 @@ export default {
       default: true,
     }
   },
+  components: {
+    FileUpload,
+    MultiselectDropdown
+  },
   setup(props, { emit }) {
     const processVariable = str => {
       return str.replace(/{{|}}/g, '');
     };
+    const { accountId } = useAccount();
 
     const allKeysRequired = value => {
       const keys = Object.keys(value);
@@ -34,8 +44,14 @@ export default {
     };
 
     const processedParams = ref({});
-    const file = ref("");
-    
+    const file = ref();
+    const previeImage = ref("/assets/images/default/image-preview.png");
+    const typeParameter = ref([
+      { id: 1, type: "static" },
+      { id: 2, type: "dinamic" }
+    ])
+    const mapParamType = ref({}) 
+
     const includeHeader = computed(() => {
       return props.template.components.find(
         component => component.type === 'HEADER'
@@ -58,7 +74,7 @@ export default {
         return processedParams.value[variableKey] || `{{${variable}}}`;
       });
     });
-
+    
     const v$ = useVuelidate(
       {
         file: {
@@ -92,30 +108,73 @@ export default {
       return !v$.value.$invalid
     }
 
-    const getTemplateMessage = () => {
-      let template = {
-        message: processedString.value,
-        templateParams: {
+    const getTemplateMessage = async () => {
+      let template = {}
+      try {
+        template.message = processedString.value
+        template.templateParams = {
           name: props.template.name,
           category: props.template.category,
           language: props.template.language,
           namespace: props.template.namespace,
-          processed_params: processedParams.value
-        },
-      };
-      if (includeHeader.value) {
-        template.templateParams.header = {
-          url: file.value,
-          format: includeHeader.value.format
+          processed_params: getParameterWithTypes()
         }
+        if (includeHeader.value) {
+          const response = await uploadFile(file.value, accountId.value)
+          template.templateParams.header = {
+            url: response.blobKey,
+            format: includeHeader.value.format
+          }
+        }
+        return template
+      } catch (error) {
+        console.warn({ error: `template invalid ${error}`, template })
+        return undefined
       }
-      return template
     }
 
-    const sendMessage = () => {
+    const getParameterWithTypes = () => {
+      return Object.entries(processedParams.value).reduce((acc, [key, value]) => {
+        acc[key] = {
+          content: value,
+          type: mapParamType.value[key]?.type || typeParameter.value[0].type
+        }
+        return acc;
+      }, {})
+    }
+
+    const sendMessage = async () => {
       if (!validateParams) return
-      emit('sendMessage', getTemplateMessage());
+      let template = await getTemplateMessage()
+      if (!template) {
+        console.warn({ error: "template invalid", template })
+        return
+      }
+      emit('sendMessage', template);
     };
+
+    const onFileChange = (event) => {
+      if (!event) return
+      file.value = event.file
+    }
+
+    const selectTypeVar = (key) => {
+       return mapParamType.value[key]?.id ?? typeParameter.value[0].id;
+    }
+
+    const onSelectChange = (key, event) => {
+      const id = Number(event.target.value);
+      const selected = typeParameter.value.find(opt => opt.id === id);
+      mapParamType.value[key] = selected;
+    }
+
+    watch(file, (newFile) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        previeImage.value = reader.result
+      };
+      reader.readAsDataURL(newFile);
+    });
 
     onMounted(generateVariables);
 
@@ -130,7 +189,13 @@ export default {
       getTemplateMessage,
       validateParams,
       includeHeader,
-      file
+      file,
+      onFileChange,
+      previeImage,
+      typeParameter,
+      selectTypeVar,
+      onSelectChange,
+      mapParamType
     };
   },
 };
@@ -138,54 +203,63 @@ export default {
 
 <template>
   <div class="w-full relative">
-    <span
-      v-if="!showButtonAction"
+    <span 
+      v-if="!showButtonAction" 
       class="absolute z-10 cursor-pointer"
       style="top: -30px; right: 0px;"
       @click="resetTemplate"
-    >✖</span>
-    <textarea
-      v-model="processedString"
-      rows="4"
-      readonly
-      class="template-input mt-2"
-    />
+      >✖</span>
+    <textarea 
+      v-model="processedString" 
+      rows="4" 
+      readonly 
+      class="template-input mt-2" 
+      />
     <div v-if="includeHeader" class="template__variables-container">
       <p class="variables-label">
         {{ $t('WHATSAPP_TEMPLATES.PARSER.HEADER_FILE') }}
       </p>
-      <div
-        class="template__variable-item"
-      >
-        <span class="variable-label">
-          {{includeHeader.format.toLowerCase()}}
-        </span>
-        <woot-input
-          v-model="file"
-          type="text"
-          class="variable-input"
-          :styles="{ marginBottom: 0 }"
-        />
+      <div 
+        class="template__variable flex flex-col justify-center items-center"
+        >
+        <FileUpload 
+          :multiple="false" 
+          :maximum="1" 
+          :extensions="['jpg', 'png', 'jpeg']" 
+          :accept="'image/*'"
+          @input-file="onFileChange" 
+          class="cursor-pointer">
+          <img :src="previeImage" alt="image preview header" class="image-preview" />
+          <button>Seleccionar imagen</button>
+        </FileUpload>
       </div>
     </div>
     <div v-if="variables" class="template__variables-container">
       <p class="variables-label">
         {{ $t('WHATSAPP_TEMPLATES.PARSER.VARIABLES_LABEL') }}
       </p>
-      <div
-        v-for="(variable, key) in processedParams"
-        :key="key"
-        class="template__variable-item"
-      >
+      <div 
+        v-for="(variable, key) in processedParams" 
+        :key="key" 
+        class="template__variable-item gap-2"
+        >
         <span class="variable-label">
           {{ key }}
         </span>
-        <woot-input
+                <woot-input
           v-model="processedParams[key]"
           type="text"
           class="variable-input"
           :styles="{ marginBottom: 0 }"
         />
+        <select 
+          class="w-24 m-0"
+          :value="selectTypeVar(key)" 
+          @change="(e) => onSelectChange(key, e)">
+          <option v-for="option in typeParameter" :key="option.id" :value="option.id">
+            {{ option.type }}
+          </option>
+        </select>
       </div>
       <p v-if="v$.$dirty && v$.$invalid" class="error">
         {{ $t('WHATSAPP_TEMPLATES.PARSER.FORM_ERROR_MESSAGE') }}
@@ -240,4 +314,10 @@ footer {
 .template-input {
   @apply bg-slate-25 dark:bg-slate-900 text-slate-700 dark:text-slate-100;
 }
+.image-preview{
+  object-fit: cover;
+  width: 30%;
+  margin: 0 auto;
+}
+
 </style>

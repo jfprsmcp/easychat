@@ -191,7 +191,7 @@ export default {
       return campaignDetails;
     },
     async addCampaign() {
-      if (!this.validateForm())
+      if (!await this.validateForm())
         return
       try {
         const campaignDetails = this.getCampaignDetails();
@@ -210,11 +210,11 @@ export default {
         useAlert(errorMessage);
       }
     },
-    validateForm() {
+    async validateForm() {
       let subFormValidate
       switch (this.design) {
         case this.listDesign.WHATSAPP:
-          subFormValidate = this.validateTemplateWhatsapp()
+          subFormValidate = await this.validateTemplateWhatsapp()
           break
         default:
           break
@@ -222,10 +222,10 @@ export default {
       this.v$.$touch();
       return subFormValidate && !this.v$.$invalid
     },
-    validateTemplateWhatsapp() {
+    async validateTemplateWhatsapp() {
       const whatsappCmp = this.$refs.whatsappTemplate;
       if (!whatsappCmp.validateTemplate()) return false;
-      this.template = whatsappCmp.getTemplateMessage();
+      this.template = await whatsappCmp.getTemplateMessage();
       this.message = this.template.message;
       return true;
     },
@@ -246,7 +246,7 @@ export default {
     },
     getAdditionalAttributes(inboxId) {
       let selectedInbox = this.inboxes.find((inbox) => inbox.id == inboxId)
-      if (!selectedInbox) {
+      if (!selectedInbox || !this.template) {
         return {}
       }
       if (selectedInbox.channel_type == INBOX_TYPES.WHATSAPP) {
