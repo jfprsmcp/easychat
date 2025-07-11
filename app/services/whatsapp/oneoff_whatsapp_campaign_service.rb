@@ -25,31 +25,32 @@ class Whatsapp::OneoffWhatsappCampaignService
     contacts    = campaign.account.contacts.tagged_with(audience_labels, any: true)
     user        = User.find_by(id: campaign.sender_id)
     inbox       = Inbox.find_by(id: campaign.inbox_id)
-    attachments = load_file(campaign.additional_attributes["template_params"]["header"])
+    template_campaign = campaign.additional_attributes
+    file_blob = ActiveStorage::Blob.find_by(key: template_campaign["template_params"]["header"]["url"]) if header_exists?(template_campaign)
+    attachments = load_file_blob(file_blob) if header_exists?(template_campaign)
+    file_url = generate_file_url(file_blob) if header_exists?(template_campaign)
     return if user.nil? || inbox.nil?
     contacts.each do |contact|
       next if contact.phone_number.blank?
       conversation = get_last_conversation(contact, inbox)
       Messages::MessageBuilder.new(user, conversation, {
-        content: campaign.message,
+        content: interpolate_message(contact, template_campaign["template_params"]["processed_params"], campaign.message),
         message_type: 'outgoing',
-        template_params: campaign.additional_attributes["template_params"],
+        template_params: generate_template(contact, file_url, template_campaign),
         attachments: attachments
       }).perform
     end
   end
 
-  def load_file(header)
-    return nil if header.blank?
+  def load_file_blob(file_blob)
     tempfile = Tempfile.new
     tempfile.binmode
-    tempfile.write(URI.open(header["url"]).read)
+    tempfile.write(file_blob.download)
     tempfile.rewind
-    filename = File.basename(URI.parse(header["url"]).path)
     [
       ActionDispatch::Http::UploadedFile.new(
-        filename: filename,
-        type: Rack::Mime.mime_type(File.extname(filename)),
+        filename: file_blob.filename.to_s,
+        type: file_blob.content_type,
         tempfile: tempfile
       )
     ]
@@ -74,4 +75,48 @@ class Whatsapp::OneoffWhatsappCampaignService
     })
   end
 
+  def generate_template(contact, file_url, template_campaign)
+    template_params = {
+        "name" => template_campaign["template_params"]["name"],
+        "category" => template_campaign["template_params"]["category"],
+        "language" => template_campaign["template_params"]["language"],
+        "processed_params" => process_parameters(contact, template_campaign["template_params"]["processed_params"])
+    }
+    if header_exists?(template_campaign)
+      template_params["header"] = {
+        "url" => file_url,
+        "format" => template_campaign["template_params"]["header"]["format"]
+      }
+    end
+    template_params
+  end
+
+  def interpolate_message(contact, params, content)
+    params.each do |key, value|
+      if value["type"] == "dinamic"
+        interpolate = contact.try(value["content"]) || value["content"]
+        content = content.gsub(key, interpolate.to_s)
+      end
+    end
+    content
+  end
+
+  def process_parameters(contact, params)
+    params.each_with_object({}) do |(key, value), acc|
+      if value["type"] == "static"
+        acc[key] = value["content"]
+      else
+        acc[key] = contact.try(value["content"]) || value["content"]
+      end
+    end
+  end
+
+  def header_exists?(template)
+    template.dig("template_params", "header").present?
+  end
+
+  def generate_file_url(blob)
+    ActiveStorage::Current.url_options ||= { host: ENV.fetch("FRONTEND_URL") }
+    blob.url(expires_in: 1.day, disposition: "inline")
+  end
 end
