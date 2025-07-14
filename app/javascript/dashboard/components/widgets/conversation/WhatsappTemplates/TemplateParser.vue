@@ -50,7 +50,7 @@ export default {
       { id: 1, type: "static" },
       { id: 2, type: "dinamic" }
     ])
-    const mapParamType = ref({}) 
+    const attributesContact = ref(["name","email","phone_number"])
 
     const includeHeader = computed(() => {
       return props.template.components.find(
@@ -71,7 +71,7 @@ export default {
     const processedString = computed(() => {
       return templateString.value.replace(/{{([^}]+)}}/g, (match, variable) => {
         const variableKey = processVariable(variable);
-        return processedParams.value[variableKey] || `{{${variable}}}`;
+        return processedParams.value[variableKey]?.content || `{{${variable}}}`;
       });
     });
     
@@ -94,7 +94,10 @@ export default {
 
       const finalVars = matchedVariables.map(i => processVariable(i));
       processedParams.value = finalVars.reduce((acc, variable) => {
-        acc[variable] = '';
+        acc[variable] = {
+          content: "",
+          type: "static"
+        }
         return acc;
       }, {});
     };
@@ -117,7 +120,7 @@ export default {
           category: props.template.category,
           language: props.template.language,
           namespace: props.template.namespace,
-          processed_params: getParameterWithTypes()
+          processed_params: processedParams
         }
         if (includeHeader.value) {
           const response = await uploadFile(file.value, accountId.value)
@@ -131,16 +134,6 @@ export default {
         console.warn({ error: `template invalid ${error}`, template })
         return undefined
       }
-    }
-
-    const getParameterWithTypes = () => {
-      return Object.entries(processedParams.value).reduce((acc, [key, value]) => {
-        acc[key] = {
-          content: value,
-          type: mapParamType.value[key]?.type || typeParameter.value[0].type
-        }
-        return acc;
-      }, {})
     }
 
     const sendMessage = async () => {
@@ -158,14 +151,17 @@ export default {
       file.value = event.file
     }
 
-    const selectTypeVar = (key) => {
-       return mapParamType.value[key]?.id ?? typeParameter.value[0].id;
+    const onSelectTypeParam = (paramName, value) => {
+      processedParams.value[paramName].type = value
+      if (value == 'static') {
+        processedParams.value[paramName].content = ""
+        return
+      }
+      processedParams.value[paramName].content = attributesContact.value[0];
     }
 
-    const onSelectChange = (key, event) => {
-      const id = Number(event.target.value);
-      const selected = typeParameter.value.find(opt => opt.id === id);
-      mapParamType.value[key] = selected;
+    const onSelectAttributeContact = (paramName, attributeName) => {
+      processedParams.value[paramName].content = attributeName
     }
 
     watch(file, (newFile) => {
@@ -193,9 +189,9 @@ export default {
       onFileChange,
       previeImage,
       typeParameter,
-      selectTypeVar,
-      onSelectChange,
-      mapParamType
+      onSelectTypeParam,
+      attributesContact,
+      onSelectAttributeContact
     };
   },
 };
@@ -239,24 +235,37 @@ export default {
         {{ $t('WHATSAPP_TEMPLATES.PARSER.VARIABLES_LABEL') }}
       </p>
       <div 
-        v-for="(variable, key) in processedParams" 
+        v-for="(value, key) in processedParams" 
         :key="key" 
         class="template__variable-item gap-2"
         >
         <span class="variable-label">
           {{ key }}
         </span>
-                <woot-input
-          v-model="processedParams[key]"
-          type="text"
-          class="variable-input"
-          :styles="{ marginBottom: 0 }"
-        />
+        <template v-if="value.type == 'dinamic'">
+          <select 
+            class="variable-input my-1"
+            :styles="{ marginBottom: 0 }"
+            @change="(e) => onSelectAttributeContact(key, e.target.value)"
+            >
+            <option v-for="keyword in attributesContact" :key="keyword" :value="keyword">
+              {{ keyword }}
+            </option>
+          </select>
+        </template>
+        <template v-else>
+          <woot-input
+            v-model="value.content"
+            type="text"
+            class="variable-input my-1"
+            :styles="{ marginBottom: 0 }"
+          />
+        </template>
         <select 
           class="w-24 m-0"
-          :value="selectTypeVar(key)" 
-          @change="(e) => onSelectChange(key, e)">
-          <option v-for="option in typeParameter" :key="option.id" :value="option.id">
+          :value="value.type" 
+          @change="(e) => onSelectTypeParam(key, e.target.value)">
+          <option v-for="option in typeParameter" :key="option.id" :value="option.type">
             {{ option.type }}
           </option>
         </select>
