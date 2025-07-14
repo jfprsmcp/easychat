@@ -18,6 +18,7 @@ function initialize() {
 
     iconMenu = document.querySelector("#iconMenu");
     iconClose = document.querySelector("#iconClose");
+    closeMenu = document.querySelectorAll(".closeMenuClick");
     iconProductDown = document.querySelector("#iconProductDown");
     iconProductRight = document.querySelector("#iconProductRight");
     iconResourceDown = document.querySelector("#iconResourceDown");
@@ -28,6 +29,13 @@ function listener() {
     btnMenu.addEventListener("click", handlerToogleMenu);
     btnMenuProduct.addEventListener("click", handlerToogleMenuProduct);
     btnMenuResource.addEventListener("click", handlerToogleMenuResource);
+    closeMenu.forEach((element) => {
+        element.addEventListener("click", () => {
+            iconMenu.classList.toggle("hidden");
+            iconClose.classList.toggle("hidden");
+            contentMenu.style.display = "none"; 
+        })
+    })
 }
 
 function handlerToogleMenu() {
