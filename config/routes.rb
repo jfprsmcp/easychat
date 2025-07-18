@@ -392,6 +392,7 @@ Rails.application.routes.draw do
           end
         end
         resources :agent_bots, only: [:index, :create, :show, :update, :destroy] do
+          get    :query , on: :collection
           delete :avatar, on: :member
         end
         resources :accounts, only: [:create, :show, :update, :destroy] do

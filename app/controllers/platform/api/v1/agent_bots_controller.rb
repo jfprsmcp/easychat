@@ -1,6 +1,10 @@
+require 'cgi'
+require 'action_view'
+include ActionView::Helpers::SanitizeHelper
+
 class Platform::Api::V1::AgentBotsController < PlatformController
-  before_action :set_resource, except: [:index, :create]
-  before_action :validate_platform_app_permissible, except: [:index, :create]
+  before_action :set_resource, except: [:index, :create, :query]
+  before_action :validate_platform_app_permissible, except: [:index, :create, :query]
 
   def index
     @resources = @platform_app.platform_app_permissibles.where(permissible_type: 'AgentBot').all
@@ -25,12 +29,24 @@ class Platform::Api::V1::AgentBotsController < PlatformController
     head :ok
   end
 
+  def query
+    agent_bot_inbox = AgentBotInbox.find_by(account_id: params[:account_id], inbox_id: params[:inbox_id])
+    return render json: { error: 'agent bot not found' }, status: :not_found if agent_bot_inbox.nil?
+    @resource = agent_bot_inbox.agent_bot
+    @resource.prompt = clean_tags_html(@resource.prompt)
+  end
+
   def avatar
     @resource.avatar.purge if @resource.avatar.attached?
     @resource
   end
 
   private
+
+  def clean_tags_html(text)
+    return "" if text.blank?
+    CGI.unescapeHTML(strip_tags(text))
+  end
 
   def set_resource
     @resource = AgentBot.find(params[:id])
