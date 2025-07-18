@@ -1,0 +1,107 @@
+<%#
+# Form Partial
+
+This partial is rendered on a resource's `new` and `edit` pages,
+and renders all form fields for a resource's editable attributes.
+
+## Local variables:
+
+- `page`:
+  An instance of [Administrate::Page::Form][1].
+  Contains helper methods to display a form,
+  and knows which attributes should be displayed in the resource's form.
+
+[1]: http://www.rubydoc.info/gems/administrate/Administrate/Page/Form
+%>
+<style>
+  .field-unit__field{
+    max-width: 70%
+  }
+  .tox-toolbar-overlord .tox-toolbar__primary{
+    display : flex;
+    justify-content: end;
+  }
+  .tox-fullscreen{
+    padding: 0 20px;
+    margin: 0 0 !important;
+  }
+</style>
+<script src="/assets/tinymce/tinymce.min.js"></script>
+
+<%= form_for([namespace, page.resource], html: { class: "form" }) do |f| %>
+  <% if page.resource.errors.any? %>
+    <div id="error_explanation">
+      <h2>
+        <%= t(
+          "administrate.form.errors",
+          pluralized_errors: pluralize(page.resource.errors.count, t("administrate.form.error")),
+          resource_name: display_resource_name(page.resource_name, singular: true)
+        ) %>
+      </h2>
+
+      <ul>
+        <% page.resource.errors.full_messages.each do |message| %>
+          <li class="flash-error"><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% page.attributes(controller.action_name).each do |title, attributes| -%>
+    <fieldset class="<%= "field-unit--nested" if title.present? %>">
+      <% if title.present? %>
+        <legend><%= t "helpers.label.#{f.object_name}.#{title}", default: title %></legend>
+      <% end %>
+
+      <% attributes.each do |attribute| %>
+        <div class="field-unit field-unit--<%= attribute.html_class %> field-unit--<%= requireness(attribute) %>">
+          <%= render_field attribute, f: f %>
+          <% hint_key = "administrate.field_hints.#{page.resource_name}.#{attribute.name}" %>
+          <% if I18n.exists?(hint_key) -%>
+            <div class="field-unit__hint">
+              <%= I18n.t(hint_key) %>
+            </div>
+          <% end -%>
+        </div>
+      <% end %>
+
+      <% field_prompt = :prompt %>
+      <% hint_prompt = "administrate.field_hints.#{page.resource_name}.#{field_prompt}" %>
+      <div class="field-unit field-unit--string field-unit--optional test">
+          <%= f.label field_prompt, field_prompt.to_s.humanize, class: "field-unit__label" %>
+          <%= f.text_area field_prompt, rows: 4, class: "field-unit__field", id: "prompt" %>
+          <% if I18n.exists?(hint_prompt) %>
+            <div class="field-unit__hint">
+              <%= I18n.t(hint_prompt) %>
+            </div>
+          <% end %>
+      </div>
+
+    </fieldset>
+  <% end -%>
+
+  <div class="form-actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<script>
+ document.addEventListener("DOMContentLoaded", function () {
+    tinymce.init({
+      selector: '#prompt',
+      plugins: 'searchreplace fullscreen',
+      toolbar: 'searchreplace fullscreen',
+      menubar: false,
+      width:"100%",
+      branding: false,
+      setup: function (editor) {
+        editorGlobal = editor
+        editor.on('init', function () {
+          editor.getContainer().style.minHeight = '400px';
+          editor.getContainer().style.width = '70%';
+          editor.getContainer().style.margin = '0px 18px';
+        });
+      }
+    })
+ })
+</script> 
