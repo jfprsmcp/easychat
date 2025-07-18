@@ -8,6 +8,7 @@
 #  description  :string
 #  name         :string
 #  outgoing_url :string
+#  prompt       :text
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
 #  account_id   :bigint
