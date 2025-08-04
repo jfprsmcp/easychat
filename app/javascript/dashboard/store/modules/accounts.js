@@ -5,6 +5,7 @@ import { differenceInDays } from 'date-fns';
 import EnterpriseAccountAPI from '../../api/enterprise/account';
 import { throwErrorMessage } from '../utils/api';
 import { getLanguageDirection } from 'dashboard/components/widgets/conversation/advancedFilterItems/languages';
+import Vue from 'vue';
 
 const findRecordById = ($state, id) =>
   $state.records.find(record => record.id === Number(id)) || {};
@@ -66,7 +67,9 @@ export const actions = {
   update: async ({ commit }, updateObj) => {
     commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: true });
     try {
-      await AccountAPI.update('', updateObj);
+      const response = await AccountAPI.update('', updateObj);
+      const { logo, id } = response.data
+      commit(types.default.EDIT_ACCOUNT_ID, { id, logo });
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: false });
     } catch (error) {
       commit(types.default.SET_ACCOUNT_UI_FLAG, { isUpdating: false });
@@ -133,6 +136,12 @@ export const mutations = {
   [types.default.ADD_ACCOUNT]: MutationHelpers.setSingleRecord,
   [types.default.EDIT_ACCOUNT]: MutationHelpers.update,
   [types.default.SET_ACCOUNT_LIMITS]: MutationHelpers.updateAttributes,
+  [types.default.EDIT_ACCOUNT_ID](_state, { id, ...payload }) {
+    const accountIndex = _state.records.findIndex((account) => account.id == id);
+    if (accountIndex < 0) return
+    const account = _state.records[accountIndex]
+    Vue.set(_state.records, accountIndex, { ...account, ...payload });
+  }
 };
 
 export default {

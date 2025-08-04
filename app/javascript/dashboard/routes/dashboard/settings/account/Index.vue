@@ -22,6 +22,8 @@ export default {
       id: '',
       name: '',
       locale: 'en',
+      file:'',
+      logoUrl:'',
       domain: '',
       supportEmail: '',
       features: {},
@@ -103,6 +105,7 @@ export default {
       try {
         const {
           name,
+          logo,
           locale,
           id,
           domain,
@@ -114,6 +117,7 @@ export default {
 
         this.$root.$i18n.locale = locale;
         this.name = name;
+        this.logoUrl = logo;
         this.locale = locale;
         this.id = id;
         this.domain = domain;
@@ -133,13 +137,20 @@ export default {
         return;
       }
       try {
-        await this.$store.dispatch('accounts/update', {
+        const formData = new FormData()
+        const data = {
           locale: this.locale,
           name: this.name,
           domain: this.domain,
+          logo: this.file,
           support_email: this.supportEmail,
           auto_resolve_duration: this.autoResolveDuration,
-        });
+        }
+        for (const [key, value] of Object.entries(data)) {
+          if (value !== undefined && value !== null && value !== '') 
+            formData.append(key, value)
+        }
+        await this.$store.dispatch('accounts/update', formData);
         this.$root.$i18n.locale = this.locale;
         this.getAccount(this.id).locale = this.locale;
         this.updateDirectionView(this.locale);
@@ -155,6 +166,22 @@ export default {
         rtl_view: isRTLSupported,
       });
     },
+    loadImagenDefault(event){
+        event.target.src = '/LandingPage/LogoEasyContact.png';
+    },
+    onChangeLogo(event) {
+      try {
+        this.file = event.target.files[0]
+        if(!this.file) return
+        const reader = new FileReader();
+        reader.onload = e => {
+          this.logoUrl = e.target.result;
+        };
+        reader.readAsDataURL(this.file);
+      } catch (error) {
+        console.warn({ error })
+      }
+    }
   },
 };
 </script>
@@ -162,51 +189,62 @@ export default {
 <template>
   <div class="flex-grow flex-shrink min-w-0 p-6 overflow-auto">
     <form v-if="!uiFlags.isFetchingItem" @submit.prevent="updateAccount">
-      <div
-        class="flex flex-row p-4 border-b border-slate-25 dark:border-slate-800"
-      >
-        <div
-          class="flex-grow-0 flex-shrink-0 flex-[25%] min-w-0 py-4 pr-6 pl-0"
+      <div 
+        class="flex mx-auto flex-column flex-wrap w-[70%] border-b border-slate-25 dark:border-slate-800"
+        >
+        <div 
+          class="w-full"
         >
           <h4 class="text-lg font-medium text-black-900 dark:text-slate-200">
             {{ $t('GENERAL_SETTINGS.FORM.GENERAL_SECTION.TITLE') }}
           </h4>
           <p>{{ $t('GENERAL_SETTINGS.FORM.GENERAL_SECTION.NOTE') }}</p>
         </div>
-        <div class="p-4 flex-grow-0 flex-shrink-0 flex-[50%]">
-          <label :class="{ error: v$.name.$error }">
-            {{ $t('GENERAL_SETTINGS.FORM.NAME.LABEL') }}
+        <div class="w-full">
+          <div class="flex gap-5">
+            <div class="flex flex-col justify-start gap-1">
+              <label>{{ $t('GENERAL_SETTINGS.LOGO') }}</label>
+              <label for="id-logo" class="content-logo">
+                <img @error="loadImagenDefault" class="logo" :src="logoUrl" alt="logo company" />
+                <input id="id-logo" @change="onChangeLogo"  accept="image/*" type="file" class="hidden" />
+              </label>
+            </div>
+            <div class="flex-1">
+              <label :class="{ error: v$.name.$error }">
+                {{ $t('GENERAL_SETTINGS.FORM.NAME.LABEL') }}
             <input
               v-model="name"
               type="text"
               :placeholder="$t('GENERAL_SETTINGS.FORM.NAME.PLACEHOLDER')"
               @blur="v$.name.$touch"
             />
-            <span v-if="v$.name.$error" class="message">
-              {{ $t('GENERAL_SETTINGS.FORM.NAME.ERROR') }}
-            </span>
-          </label>
-          <label :class="{ error: v$.locale.$error }">
-            {{ $t('GENERAL_SETTINGS.FORM.LANGUAGE.LABEL') }}
-            <select v-model="locale">
+                <span v-if="v$.name.$error" class="message">
+                  {{ $t('GENERAL_SETTINGS.FORM.NAME.ERROR') }}
+                </span>
+              </label>
+              <label :class="{ error: v$.locale.$error }">
+                {{ $t('GENERAL_SETTINGS.FORM.LANGUAGE.LABEL') }}
+                <select v-model="locale">
               <option
                 v-for="lang in languagesSortedByCode"
                 :key="lang.iso_639_1_code"
                 :value="lang.iso_639_1_code"
               >
-                {{ lang.name }}
-              </option>
-            </select>
-            <span v-if="v$.locale.$error" class="message">
-              {{ $t('GENERAL_SETTINGS.FORM.LANGUAGE.ERROR') }}
-            </span>
-          </label>
+                    {{ lang.name }}
+                  </option>
+                </select>
+                <span v-if="v$.locale.$error" class="message">
+                  {{ $t('GENERAL_SETTINGS.FORM.LANGUAGE.ERROR') }}
+                </span>
+              </label>
+            </div>
+          </div>
           <label v-if="featureInboundEmailEnabled">
             {{ $t('GENERAL_SETTINGS.FORM.FEATURES.INBOUND_EMAIL_ENABLED') }}
           </label>
           <label v-if="featureCustomReplyDomainEnabled">
             {{
-              $t('GENERAL_SETTINGS.FORM.FEATURES.CUSTOM_EMAIL_DOMAIN_ENABLED')
+            $t('GENERAL_SETTINGS.FORM.FEATURES.CUSTOM_EMAIL_DOMAIN_ENABLED')
             }}
           </label>
           <label v-if="featureCustomReplyDomainEnabled">
@@ -248,11 +286,9 @@ export default {
       </div>
 
       <div
-        class="flex flex-row p-4 border-slate-25 dark:border-slate-700 text-black-900 dark:text-slate-300"
-      >
-        <div
-          class="flex-grow-0 flex-shrink-0 flex-[25%] min-w-0 py-4 pr-6 pl-0"
+        class="flex mx-auto flex-column flex-wrap w-[70%] border-slate-25 dark:border-slate-700 text-black-900 dark:text-slate-300"
         >
+        <div class="w-full">
           <h4 class="text-lg font-medium text-black-900 dark:text-slate-200">
             {{ $t('GENERAL_SETTINGS.FORM.ACCOUNT_ID.TITLE') }}
           </h4>
@@ -260,7 +296,7 @@ export default {
             {{ $t('GENERAL_SETTINGS.FORM.ACCOUNT_ID.NOTE') }}
           </p>
         </div>
-        <div class="p-4 flex-grow-0 flex-shrink-0 flex-[50%]">
+        <div class="w-full">
           <woot-code :script="getAccountId" />
         </div>
       </div>
@@ -288,3 +324,22 @@ export default {
     <woot-loading-state v-if="uiFlags.isFetchingItem" />
   </div>
 </template>
+<style>
+  .content-logo{
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px dashed #808080cc;
+    border-radius: 5px;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    padding: 0 5px;
+  }
+  .logo{
+    height: 80%;
+    border-radius: 5px;
+  }
+</style>

@@ -1,6 +1,7 @@
 {
   "GENERAL_SETTINGS": {
     "TITLE": "Account settings",
+    "LOGO": "Company logo",
     "SUBMIT": "Update settings",
     "BACK": "Back",
     "DISMISS": "Dismiss",
