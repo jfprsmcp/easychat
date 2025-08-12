@@ -8,6 +8,7 @@ import { useConfig } from 'dashboard/composables/useConfig';
 import { FEATURE_FLAGS } from '../../../../featureFlags';
 import semver from 'semver';
 import { getLanguageDirection } from 'dashboard/components/widgets/conversation/advancedFilterItems/languages';
+import wootConstants from 'dashboard/constants/globals';
 
 export default {
   setup() {
@@ -117,7 +118,7 @@ export default {
 
         this.$root.$i18n.locale = locale;
         this.name = name;
-        this.logoUrl = logo;
+        this.logoUrl = logo ?? '';
         this.locale = locale;
         this.id = id;
         this.domain = domain;
@@ -167,7 +168,7 @@ export default {
       });
     },
     loadImagenDefault(event){
-        event.target.src = '/LandingPage/LogoEasyContact.png';
+        event.target.src = wootConstants.DEFAULT_LOGO
     },
     onChangeLogo(event) {
       try {

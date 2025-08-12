@@ -1,6 +1,7 @@
 <script>
 import { frontendURL } from 'dashboard/helper/URLHelper';
 import { mapGetters } from 'vuex';
+import wootConstants from 'dashboard/constants/globals';
 
 export default {
   props: {
@@ -17,6 +18,11 @@ export default {
       default: 0,
     },
   },
+  data() {
+    return {
+      defaultLogo: wootConstants.DEFAULT_LOGO
+    }
+  },
   computed: {
     ...mapGetters({
       getAccount: 'accounts/getAccount',
@@ -30,7 +36,7 @@ export default {
   },
   methods: {
     loadImagenDefault(event){
-        event.target.src = '/LandingPage/LogoEasyContact.png';
+        event.target.src = this.defaultLogo
     }
   }
 };
@@ -39,7 +45,12 @@ export default {
 <template>
   <div class="w-8 h-8">
     <router-link :to="dashboardPath" replace>
-        <img @error="loadImagenDefault" :src="account.logo" alt="logo company" class="shadow-filter-logo"/>
+        <template v-if="account.logo">
+          <img @error="loadImagenDefault" :src="account.logo" alt="logo company" class="shadow-filter-logo"/>
+        </template>
+        <template v-else>
+          <img @error="loadImagenDefault" :src="defaultLogo" alt="logo company" class="shadow-filter-logo"/>
+        </template>
     </router-link>
   </div>
 </template>
