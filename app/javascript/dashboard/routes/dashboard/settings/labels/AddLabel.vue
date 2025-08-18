@@ -35,7 +35,7 @@ export default {
   },
   mounted() {
     this.color = getRandomColor();
-    this.title = this.prefillTitle.toLowerCase();
+    this.title = this.prefillTitle;
   },
   methods: {
     onClose() {
@@ -46,7 +46,7 @@ export default {
         await this.$store.dispatch('labels/create', {
           color: this.color,
           description: this.description,
-          title: this.title.toLowerCase(),
+          title: this.title,
           show_on_sidebar: this.showOnSidebar,
         });
         useAlert(this.$t('LABEL_MGMT.ADD.API.SUCCESS_MESSAGE'));
@@ -71,7 +71,7 @@ export default {
       <woot-input
         v-model.trim="title"
         :class="{ error: v$.title.$error }"
-        class="w-full label-name--input"
+        class="w-full"
         :label="$t('LABEL_MGMT.FORM.NAME.LABEL')"
         :placeholder="$t('LABEL_MGMT.FORM.NAME.PLACEHOLDER')"
         :error="labelTitleErrorMessage"
@@ -116,14 +116,3 @@ export default {
     </form>
   </div>
 </template>
-
-<style lang="scss" scoped>
-// Label API supports only lowercase letters
-.label-name--input {
-  ::v-deep {
-    input {
-      @apply lowercase;
-    }
-  }
-}
-</style>
