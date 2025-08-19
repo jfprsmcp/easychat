@@ -1,0 +1,68 @@
+{
+    "AGENTS_AI": {
+        "HEADER_INDEX": {
+            "TITLE": "Agentes IA",
+            "DESCRIPTION": "Elige un agente de inteligencia artificial en la lista de abajo, para poder modificar sus capacidades de acorde a las necesidades de tu empresa."
+        },
+        "HEADER_CAPABILITIES": {
+            "TITLE": "Capacidades",
+            "DESCRIPTION_A": "En esta sección puedes configurar cómo deseas que tu agente de inteligencia artificial te ayude a responder mensajes, brindar información o realizar tareas de forma automática.",
+            "DESCRIPTION_B": "Personaliza su comportamiento, el tono de sus respuestas y las funciones que deseas activar. No necesitas conocimientos técnicos: solo elige lo que mejor se adapte a tu negocio y deja que el agente trabaje por ti."
+        },
+        "CARDS": {
+            "IN_DEPLOY":"En desarrollo",
+            "RAG": {
+                "NAME": "Fuente de conocimiento",
+                "DESCRIPTION": "Agrega archivos PDF con información sobre tu negocio. Estos documentos servirán para entrenar al agente y ayudarlo a responder de forma más precisa y enfocada según la información que tú le proporciones.",
+                "FORM": {
+                    "LABEL_COLLECTION": "Título del documento.",
+                    "PLACEHOLDER_COLLECTION": "Ingresa el título para identificar el documento.",
+                    "LABEL_FILE": "Selecciona un documento.",
+                    "SUBMIT": "Agregar"
+                }
+            },
+            "CALENDAR": {
+                "NAME": "Maneja tu calendario",
+                "DESCRIPTION": "Haz clic en el botón para autorizar el acceso a tu calendario. Esto permitirá que el agente pueda ver, editar y agregar eventos en tu nombre."
+            },
+            "CATALOG": {
+                "NAME": "Catálogo de productos",
+                "DESCRIPTION": "En esta sección se pueden agregar los productos del catálogo de la empresa, proporcionando al agente de inteligencia artificial la información necesaria sobre cada artículo. De esta manera, el agente podrá conocer las características, precios y disponibilidad de los productos, y utilizarlos de forma efectiva durante el proceso de ventas."
+            },
+            "CONFIGURATION": {
+                "NAME": "Configuración del agente",
+                "DESCRIPTION": "Esta sección permite configurar los datos principales de un agente de inteligencia artificial, incluyendo su nombre, descripción y otros parámetros relevantes. Aquí podrás definir la información que identificará al agente y personalizar su comportamiento según las necesidades del sistema.",
+                "FORM": {
+                    "NAME": {
+                        "LABEL": "Nombre del agente",
+                        "PLACEHOLDER": "Ingrese el nombre de su agente",
+                        "ERROR": "El nombre es requerido"
+                    },
+                    "DESCRIPTION": {
+                        "LABEL": "Descripción del agente",
+                        "PLACEHOLDER": "Introduzca una descripción de la agente",
+                        "ERROR": "La descripción es requerida"
+                    },
+                    "PROMPT": {
+                        "LABEL": "Prompt del agente",
+                        "PLACEHOLDER": "Ingresa el prompt inicial de tu agente",
+                        "ERROR": "El prompt es requerido"
+                    },
+                    "SCHEDULE":{
+                        "LABEL":"Habilitar horario de activación del agente de IA.",
+                        "INIT":"Iniciar",
+                        "FINISH":"Finalizar"
+                    },
+                    "SUBMIT": "Actualizar",
+                    "CANCEL": "Cancelar"
+                }
+            }
+        },
+        "MODALS": {
+            "RAG": {},
+            "CALENDAR": {
+                "ADD_GOOGLE_ACOUNT": "Agrega tu cuenta de Google"
+            }
+        }
+    }
+}

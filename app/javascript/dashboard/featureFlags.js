@@ -1,5 +1,6 @@
 export const FEATURE_FLAGS = {
   AGENT_BOTS: 'agent_bots',
+  AGENT_IA: 'agents_ia',
   AGENT_MANAGEMENT: 'agent_management',
   AUTO_RESOLVE_CONVERSATIONS: 'auto_resolve_conversations',
   AUTOMATIONS: 'automations',
