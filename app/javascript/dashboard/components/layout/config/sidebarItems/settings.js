@@ -38,6 +38,8 @@ const settings = accountId => ({
     'settings_teams_finish',
     'settings_teams_list',
     'settings_teams_new',
+    'settings_agents_ia',
+    'settings_agent_capabilities',
     'sla_list',
     'sorter_list',
     'board_list',
@@ -63,6 +65,16 @@ const settings = accountId => ({
       toState: frontendURL(`accounts/${accountId}/settings/agents/list`),
       toStateName: 'agent_list',
       featureFlag: FEATURE_FLAGS.AGENT_MANAGEMENT,
+    },
+    {
+      icon: 'credit-card-person', 
+      label: 'AGENTS_IA',
+      hasSubMenu: false,
+      meta: {
+        permissions: ['administrator'],
+      },
+      toState: frontendURL(`accounts/${accountId}/settings/agents-ia`),
+      toStateName: 'settings_agents_ia',
     },
     {
       icon: 'people-team',

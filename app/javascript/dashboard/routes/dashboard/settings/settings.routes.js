@@ -19,6 +19,7 @@ import teams from './teams/teams.routes';
 import profile from './profile/profile.routes';
 import sorter from './sorter/sorter.route';
 import board from './board/board.route';
+import agentsIA from './agentsIA/agentsIA.routes';
 
 export default {
   routes: [
@@ -53,6 +54,7 @@ export default {
     ...teams.routes,
     ...profile.routes,
     ...sorter.routes,
-    ...board.routes
+    ...board.routes,
+    ...agentsIA.routes
   ],
 };

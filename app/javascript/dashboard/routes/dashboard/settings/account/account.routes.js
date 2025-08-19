@@ -6,14 +6,13 @@ export default {
   routes: [
     {
       path: frontendURL('accounts/:accountId/settings/general'),
-      meta: {
-        permissions: ['administrator'],
-      },
-      component: SettingsContent,
       props: {
         headerTitle: 'GENERAL_SETTINGS.TITLE',
         icon: 'briefcase',
         showNewButton: false,
+      },
+      meta: {
+        permissions: ['administrator'],
       },
       children: [
         {
@@ -25,6 +24,7 @@ export default {
           },
         },
       ],
+      component: SettingsContent,
     },
   ],
 };
