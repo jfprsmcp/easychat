@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_07_15_213906) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_19_163544) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -113,6 +113,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_15_213906) do
     t.integer "bot_type", default: 0
     t.jsonb "bot_config", default: {}
     t.text "prompt"
+    t.integer "agent_type", default: 0
+    t.string "init_at", default: ""
+    t.string "finish_at", default: ""
     t.index ["account_id"], name: "index_agent_bots_on_account_id"
   end
 
