@@ -8,6 +8,7 @@ class DataImportJob < ApplicationJob
   def perform(data_import)
     @data_import = data_import
     @contact_manager = DataImport::ContactManager.new(@data_import.account)
+    @labels = @data_import.account.labels
     begin
       process_import_file
       send_import_notification_to_admin
@@ -38,9 +39,14 @@ class DataImportJob < ApplicationJob
     clean_data = utf8_data.valid_encoding? ? utf8_data : utf8_data.encode('UTF-16le', invalid: :replace, replace: '').encode('UTF-8')
 
     csv = CSV.parse(clean_data, headers: true)
+    allowed_tags = @labels.pluck(:title)
 
     csv.each do |row|
       current_contact = @contact_manager.build_contact(row.to_h.with_indifferent_access)
+      if row['labels'].present?
+        current_contact.label_list = row['labels'].split(',').map(&:strip) & allowed_tags
+      end
+
       if current_contact.valid?
         contacts << current_contact
       else
@@ -56,9 +62,22 @@ class DataImportJob < ApplicationJob
     rejected_contacts << row
   end
 
-  def import_contacts(contacts)
+  def import_contacts(contacts)          
     # <struct ActiveRecord::Import::Result failed_instances=[], num_inserts=1, ids=[444, 445], results=[]>
     Contact.import(contacts, synchronize: contacts, on_duplicate_key_ignore: true, track_validation_failures: true, validate: true, batch_size: 1000)
+    run_trigger_taggings_contact(contacts)
+  end
+
+  def run_trigger_taggings_contact(contacts)
+    contacts.each do |contact|
+      next if contact.label_list.blank?
+
+      contact_saved = Contact.find_by(id: contact.id)
+      next unless contact_saved
+      
+      contact_saved.label_list = contact.label_list
+      contact_saved.save_tags
+    end
   end
 
   def update_data_import_status(processed_records, rejected_records)

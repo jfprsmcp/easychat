@@ -1,6 +1,7 @@
 {
   "GENERAL_SETTINGS": {
     "TITLE": "Configuración de la cuenta",
+    "LOGO": "Logo de la empresa",
     "SUBMIT": "Actualizar ajustes",
     "BACK": "Atrás",
     "DISMISS": "Descartar",

@@ -319,7 +319,12 @@ export default {
         </label>
         
         <template v-if="design==listDesign.WHATSAPP">
-          <label>Templates whatssap</label>
+          <label>
+            Templates whatsapp 
+            <small class="font-medium text-gray">
+              ( Las plantillas nuevas puede tomar alrededor de 3hr en ser aceptadas )
+            </small>
+          </label>
           <WhatsappTemplates
             ref="whatsappTemplate"
             :inbox-id="selectedInbox"

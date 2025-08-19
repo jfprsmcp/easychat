@@ -96,15 +96,18 @@ class Whatsapp::IncomingMessageBaseService
 
   def set_conversation
     # if lock to single conversation is disabled, we will create a new conversation if previous conversation is resolved
-    @conversation = if @inbox.lock_to_single_conversation
-                      @contact_inbox.conversations.last
-                    else
-                      @contact_inbox.conversations
-                                    .where.not(status: :resolved).last
-                    end
-    return if @conversation
+    # Avoid race conditions by using database row locking
+    @contact_inbox.with_lock do
+      @conversation = if @inbox.lock_to_single_conversation
+                        @contact_inbox.conversations.last
+                      else
+                        @contact_inbox.conversations
+                                      .where.not(status: :resolved).last
+                      end
+      return if @conversation
 
-    @conversation = ::Conversation.create!(conversation_params)
+      @conversation = ::Conversation.create!(conversation_params)
+    end
   end
 
   def attach_files

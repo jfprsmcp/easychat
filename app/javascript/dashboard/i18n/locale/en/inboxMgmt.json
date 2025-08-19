@@ -261,6 +261,16 @@
           "ERROR_MESSAGE": "We were not able to save the WhatsApp channel"
         }
       },
+      "WHATSAPPWEB": {
+        "TITLE": "WhatsApp Web Channel",
+        "DESC": "Start supporting your customers via WhatsApp Web.",
+        "INBOX_NAME": {
+          "LABEL": "Inbox Name",
+          "PLACEHOLDER": "Please enter an inbox name",
+          "ERROR": "This field is required"
+        },
+        "GENERATE_QR_BUTTON": "Generate QR"
+      },
       "API_CHANNEL": {
         "TITLE": "API Channel",
         "DESC": "Integrate with API channel and start supporting your customers.",

@@ -17,7 +17,13 @@ class Account::ContactsExportJob < ApplicationJob
     csv_data = CSV.generate do |csv|
       csv << headers
       contacts.each do |contact|
-        csv << headers.map { |header| contact.send(header) }
+        csv << headers.map do |header| 
+          if header == 'labels'
+            Array(contact.label_list).join(", ")
+          else
+            contact.send(header)
+          end
+        end
       end
     end
 
@@ -36,7 +42,9 @@ class Account::ContactsExportJob < ApplicationJob
   end
 
   def valid_headers(column_names)
-    (column_names.presence || default_columns) & Contact.column_names
+    headers = (column_names.presence || default_columns) & Contact.column_names
+    headers = (headers + ["labels"]).uniq
+    headers
   end
 
   def attach_export_file(csv_data)
