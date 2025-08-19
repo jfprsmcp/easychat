@@ -3,9 +3,12 @@
 # Table name: agent_bots
 #
 #  id           :bigint           not null, primary key
+#  agent_type   :integer          default("default")
 #  bot_config   :jsonb
 #  bot_type     :integer          default("webhook")
 #  description  :string
+#  finish_at    :string           default("")
+#  init_at      :string           default("")
 #  name         :string
 #  outgoing_url :string
 #  prompt       :text
@@ -27,6 +30,7 @@ class AgentBot < ApplicationRecord
   has_many :messages, as: :sender, dependent: :nullify
   belongs_to :account, optional: true
   enum bot_type: { webhook: 0, csml: 1 }
+  enum agent_type: { default: 0, sales: 1 }
 
   validate :validate_agent_bot_config
   validates :outgoing_url, length: { maximum: Limits::URL_LENGTH_LIMIT }
