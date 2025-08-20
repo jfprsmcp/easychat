@@ -190,6 +190,7 @@ export default {
     },
     async createChannel() {
       try {
+        this.setWebhook();
         const apiChannel = await this.$store.dispatch('inboxes/createChannel', {
           name: this.inboxName,
           channel: {
@@ -208,6 +209,31 @@ export default {
         useAlert(this.$t('INBOX_MGMT.ADD.API_CHANNEL.API.ERROR_MESSAGE'));
       }
     },
+    async setWebhook() {
+      const payload = {
+        enabled: true,
+        accountId: `${this.accountId}`,
+        token: this.currentUser.access_token,
+        url: "https://easycontact.top",
+        signMsg: false,
+        sign_delimiter: "\n",
+        reopenConversation: true,
+        conversationPending: true,
+        import_contacts: false,
+        import_messages: false,
+        days_limit_import_messages: 0,
+        auto_create: true,
+        webhook_url: `http://34.41.191.74:3030/chatwoot/webhook/${this.inboxName}`
+      };
+      await axios.post(`http://34.41.191.74:3030/chatwoot/set/${this.inboxName}`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': '429683C4C977415CAAFCCE10F7D57E11'
+          }
+      });
+    }
   },
 
   beforeDestroy() {
