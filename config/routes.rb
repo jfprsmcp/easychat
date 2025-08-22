@@ -174,6 +174,13 @@ Rails.application.routes.draw do
           end
           resources :labels, only: [:index, :show, :create, :update, :destroy]
           resources :conversation_states, only: [:index, :show, :create, :update, :destroy]
+          resources :whatsapp_instances, only: [:create], param: :instance_name do
+            member do
+              post :connect
+              get  :state
+              post :set_webhook
+            end
+          end
           resources :kanban_states, only: [:index, :create, :update, :destroy] do
             collection do
               put :update_order_batch
@@ -533,6 +540,11 @@ Rails.application.routes.draw do
     get 'onboarding', to: 'onboarding#index'
     post 'onboarding', to: 'onboarding#create'
   end
+
+  post '/whatsapp_instances/:instance_name/create', to: 'whatsapp_instances#create'
+  get '/whatsapp_instances/:instance_name/connect', to: 'whatsapp_instances#connect'
+  get '/whatsapp_instances/:instance_name/connection_state', to: 'whatsapp_instances#connection_state'
+  post '/whatsapp_instances/:instance_name/set_webhook', to: 'whatsapp_instances#set_webhook'
 
   # ---------------------------------------------------------------------
   # Routes for swagger docs
