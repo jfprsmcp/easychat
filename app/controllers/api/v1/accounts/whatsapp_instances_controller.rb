@@ -1,25 +1,18 @@
 class Api::V1::Accounts::WhatsappInstancesController < ApplicationController
-  # Si usas autenticación, filtros, etc.
 
   # POST /api/v1/accounts/:account_id/whatsapp_instances
   def create
-    # extras = params.permit(:integration, :qrcode, :webhookUrl, :other).to_h
-    wi = whatsapp_instance_params # solo los campos permitidos
+    wi = whatsapp_instance_params
     result = ::Whatsapp::WhatsappInstanceService.create_instance(wi)
-
-    Rails.logger.info "result: #{result.inspect}"
     render json: result, status: :created
   rescue ::Whatsapp::WhatsappInstanceService::Error => e
-    Rails.logger.info "error whatsapp: #{e.inspect}"
     render json: { error: e.message, status: e.status, body: e.body }, status: :bad_gateway
   rescue ActionController::ParameterMissing => e
-    Rails.logger.info "error api: #{e.inspect}"
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # POST /api/v1/accounts/:account_id/whatsapp_instances/:name/connect
   def connect
-    Rails.logger.info "params connect: #{params.inspect}"
     name   = params.require(:instance_name)
     result = ::Whatsapp::WhatsappInstanceService.connect(name)
     render json: result

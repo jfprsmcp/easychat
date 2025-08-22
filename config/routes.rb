@@ -541,11 +541,6 @@ Rails.application.routes.draw do
     post 'onboarding', to: 'onboarding#create'
   end
 
-  post '/whatsapp_instances/:instance_name/create', to: 'whatsapp_instances#create'
-  get '/whatsapp_instances/:instance_name/connect', to: 'whatsapp_instances#connect'
-  get '/whatsapp_instances/:instance_name/connection_state', to: 'whatsapp_instances#connection_state'
-  post '/whatsapp_instances/:instance_name/set_webhook', to: 'whatsapp_instances#set_webhook'
-
   # ---------------------------------------------------------------------
   # Routes for swagger docs
   get '/swagger/*path', to: 'swagger#respond'
