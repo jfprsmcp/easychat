@@ -483,6 +483,7 @@
       "CAMPAIGN": "Campaigns",
       "PRE_CHAT_FORM": "Pre Chat Form",
       "BUSINESS_HOURS": "Business Hours",
+      "REMARKETING":"Remarketing",
       "WIDGET_BUILDER": "Widget Builder",
       "BOT_CONFIGURATION": "Bot Configuration"
     },
@@ -598,6 +599,20 @@
         "CHOOSE": "Choose"
       },
       "ALL_DAY": "All-Day"
+    },
+    "REMARKETING": {
+      "BEHAVIOR": {
+        "REQUIRED": "Required",
+        "LENGTH": "Minimum length 10 is required"
+      },
+      "COUNT_MAX_REMARKETING_MESSAGE": {
+        "REQUIRED": "Required",
+        "SIZE": "A value between 1 and 20 is required"
+      },
+      "TIME_WAIT_LAST_MESSAGE": {
+        "MIN_MINUTES": "A minimum value of 5 is required",
+        "MIN_HOURS": "A minimum value of 1 is required"
+      }
     },
     "IMAP": {
       "TITLE": "IMAP",
